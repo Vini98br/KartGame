@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Exercicio 01</title>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="stylesheet" href="../../html/resources/default.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" charset="UTF-8" src="../../libs/three/three.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/three/controls/TrackballControls.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/Stats.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/dat.gui.min.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/util.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/KeyboardState.js"></script>
+</head>
+
+<body>
+  <div id="webgl-output">
+    <script type="text/javascript">
+      var stats = initStats();          // To show FPS information
+      var scene = new THREE.Scene();    // Create main scene
+      var renderer = initRenderer();    // View function in util/utils
+      var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      var clock = new THREE.Clock();
+
+      camera.up.set(0, 0, 1);
+      var cameraPosition = new THREE.Vector3(0, -30, 15);
+      camera.position.copy(cameraPosition);
+
+      var cameraUpVector = new THREE.Vector3().copy(camera.up);
+      var cameraLookingAt = new THREE.Vector3(0, 0, 0);
+      camera.lookAt(0, 0, 0);
+      // Show text information onscreen
+      showInformation();
+
+      // To use the keyboard
+      var keyboard = new KeyboardState();
+
+      // Enable mouse rotation, pan, zoom etc.
+      var trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
+
+      // Show axes (parameter is size of each axis)
+      var axesHelper = new THREE.AxesHelper(12);
+      scene.add(axesHelper);
+
+      // create the ground plane
+      var planeGeometry = new THREE.PlaneGeometry(20, 20);
+      planeGeometry.translate(0.0, 0.0, -0.02); // To avoid conflict with the axeshelper
+      var planeMaterial = new THREE.MeshBasicMaterial({
+        color: "rgb(150, 150, 150)",
+        side: THREE.DoubleSide
+      });
+      var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      // add the plane to the scene
+      scene.add(plane);
+
+      // create a cube
+      var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+      var cubeMaterial = new THREE.MeshNormalMaterial();
+      var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      // position the cube
+      cube.position.set(0.0, 0.0, 2.0);
+      // add the cube to the scene
+      scene.add(cube);
+
+      // Listen window size changes
+      window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
+
+      render();
+
+      function keyboardUpdate() {
+
+        keyboard.update();
+
+        var speed = 30;
+        var moveDistance = speed * clock.getDelta();
+        var lookSpeed = 0.5;
+
+        if (keyboard.pressed("left")) cameraPosition.x -= 1;
+        if (keyboard.pressed("right")) cameraPosition.x += 1;
+        if (keyboard.pressed("up")) cameraPosition.z += 1;
+        if (keyboard.pressed("down")) cameraPosition.z -= 1;
+
+        if (keyboard.pressed("A")) cameraLookingAt.x -= lookSpeed;
+        if (keyboard.pressed("D")) cameraLookingAt.x += lookSpeed;
+        if (keyboard.pressed("W")) cameraLookingAt.z += lookSpeed;
+        if (keyboard.pressed("S")) cameraLookingAt.z -= lookSpeed;
+
+        var up = cameraUpVector.x;
+        if (keyboard.pressed("E")) {
+          up += 0.01;
+          if (up > 1.0) up = 1.0;
+          cameraUpVector.z = 1 - Math.abs(up);
+          cameraUpVector.x = up;
+        }
+        if (keyboard.pressed("Q")) {
+          up -= 0.01;
+          if (up < -1.0) up = -1.0;
+          cameraUpVector.z = 1 - Math.abs(up);
+          cameraUpVector.x = up;
+        }
+
+        if (keyboard.pressed("Q")) {
+          cameraUpVector.x -= 0.1;
+          cameraUpVector.z += 0.1;
+        }
+        if (keyboard.pressed("E")){ 
+          cameraUpVector.x += 0.1;
+          cameraUpVector.z -= 0.1;
+        }
+
+        if (keyboard.pressed("space")) camera.position.copy(cameraPosition);
+
+        changeCamera(cameraPosition, cameraLookingAt, cameraUpVector);
+      }
+
+      function showInformation() {
+        // Use this to show information onscreen
+        controls = new InfoBox();
+        controls.add("Keyboard Example");
+        controls.addParagraph();
+        controls.add("Press WASD keys to move the camera look");
+        controls.add("Press arrow keys to move the camera position");
+        controls.add("Press QE to change the camera up vector");
+        controls.add("Press SPACE to put the camera in its original position");
+        controls.show();
+      }
+
+      function render() {
+        stats.update(); // Update FPS
+        requestAnimationFrame(render); // Show events
+        trackballControls.update();
+        keyboardUpdate();
+        renderer.render(scene, camera) // Render scene
+      }
+
+      function changeCamera(pos, look, up) {
+        camera.up.set(up.x, up.y, up.z);
+        camera.lookAt(look); // or camera.lookAt(0, 0, 0);
+        camera.position.copy(pos);
+        // cameraUpVector = new THREE.Vector3(cameraUpVector.x + x, cameraUpVector.y, cameraUpVector.z + z);
+        return camera;
+      }
+
+      function changeCameraUp(x, z) {
+        camera.up.set(cameraUpVector.x + x, cameraUpVector.y, cameraUpVector.z + z);
+        cameraUpVector = new THREE.Vector3(cameraUpVector.x + x, cameraUpVector.y, cameraUpVector.z + z);
+      }
+
+      function changeCameraLookAt(x, z) {
+        cameraLookingAt = new THREE.Vector3(cameraLookingAt.x + x, cameraLookingAt.y, cameraLookingAt.z + z);
+        console.log(camera)
+      }
+
+      function changeCameraPosition(x, z) {
+        camera.position.set(camera.position.x + x, camera.position.y, camera.position.z + z);
+      }
+    </script>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Animation</title>
+  <link rel="shortcut icon" href="../../favicon.ico">
+  <link rel="stylesheet" href="../../html/resources/default.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" charset="UTF-8" src="../../libs/three/three.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/three/controls/TrackballControls.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/three/controls/OrbitControls.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/Stats.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/dat.gui.min.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/util.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/util/KeyboardState.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/other/inflate.min.js"></script>
+  <script type="text/javascript" charset="UTF-8" src="../../libs/three/loaders/GLTFLoader.js"></script>
+
+</head>
+
+<body>
+  <div id="webgl-output">
+    <input type="range" min="-12.5" max="12.5" value="0" step="0.1" id="sliderX" orient="vertical"
+      style="position:absolute;bottom: 10px;left: 5px;">
+    <p style="color:white;position:absolute;bottom: 0px;left: 150px;font-size: 12px;">X</p>
+    <input type="range" min="-12.5" max="12.5" value="0" step="0.1" id="sliderY" orient="vertical"
+      style="position:absolute;bottom: 30px;left: 5px;">
+    <p style="color:white;position:absolute;bottom: 20px;left: 150px;font-size: 12px;">Y</p>
+    <input type="range" min="0" max="12.5" value="0" step="0.1" id="sliderZ" orient="vertical"
+      style="position:absolute;bottom: 50px;left: 5px;">
+    <p style="color:white;position:absolute;bottom: 40px;left: 150px;font-size: 12px;">Z</p>
+    <button id="move-btn" style="color:black;position:absolute;bottom: 30px;left: 170px;font-size: 12px;">Move</button>
+    <script type="text/javascript">
+      var stats = initStats();          // To show FPS information
+      var clock = new THREE.Clock();
+      var scene = new THREE.Scene();    // Create main scene
+      var renderer = initRenderer();    // View function in util/utils
+      var camera = initCamera(new THREE.Vector3(5, 5, 7)); // Init camera in this position
+      var light = initDefaultLighting(scene, new THREE.Vector3(0, 0, 15));
+      var animationOn = false;
+      var timeX = 0;
+      var timeY = 0;
+      var timeZ = 0;
+      var xMinor = false;
+      var yMinor = false;
+      var zMinor = false;
+
+      renderer.setClearColor("rgb(30, 30, 42)");
+      camera.lookAt(0, 0, 0);
+      camera.position.set(1.8, 30.8, 45.0);
+      camera.up.set(0, 1, 0);
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      var trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
+      window.addEventListener('resize', function () { onWindowResize(camera, renderer) }, false);
+
+      var sliderX = document.getElementById("sliderX");
+      sliderX.addEventListener("input", moveCubeX);
+
+      var sliderY = document.getElementById("sliderY");
+      sliderY.addEventListener("input", moveCubeY);
+
+      var sliderZ = document.getElementById("sliderZ");
+      sliderZ.addEventListener("input", moveCubeZ);
+
+      var button = document.getElementById("move-btn");
+      button.addEventListener("click", (e) => {
+        animationOn = !animationOn;
+        xMinor = timeX < xSlider;
+        yMinor = timeY < ySlider;
+        zMinor = timeZ < zSlider;
+      });
+
+      var groundPlane = createGroundPlane(25.0, 25.0);
+      groundPlane.rotateX(degreesToRadians(-90));
+      scene.add(groundPlane);
+
+      // Base sphere
+      var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+      var sphereMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
+      var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      groundPlane.add(sphere);
+      sphere.translateX(0.0).translateY(0.0).translateZ(-10.0);
+
+      render();
+
+      var x = 0.0;
+      var y = 0.0;
+      var z = 0.0;
+
+      var xSlider = 0.0;
+      var ySlider = 0.0;
+      var zSlider = 0.0;
+
+      function moveCubeX(e) {
+        var target = (e.target) ? e.target : e.srcElement;
+        console.log(xSlider < target.value)
+        xSlider = target.value;
+      }
+
+      function moveCubeY(e) {
+        var target = (e.target) ? e.target : e.srcElement;
+        ySlider = target.value;
+      }
+
+      function moveCubeZ(e) {
+        var target = (e.target) ? e.target : e.srcElement;
+        zSlider = target.value;
+      }
+
+      function moveSphere(x, y, z, delta) {
+        sphere.matrixAutoUpdate = false;
+        var flagX = false;
+        var flagY = false;
+        var flagZ = false;
+
+        // Set angle's animation speed
+        if (animationOn) {
+          if (timeX < x && xMinor)
+            timeX += delta * 20;
+          else if (timeX > x && !xMinor)
+            timeX -= delta * 20;
+          else
+            flagX = true;
+
+          if (timeY < y && yMinor)
+            timeY += delta * 20;
+          else if (timeY > y && !yMinor)
+            timeY -= delta * 20;
+          else
+            flagY = true;
+
+          if (timeZ < z && zMinor)
+            timeZ += delta * 20;
+          else if (timeZ > z && !zMinor)
+            timeZ -= delta * 20;
+          else
+            flagZ = true;
+
+          if (flagX && flagY && flagZ) {
+            animationOn = false;
+          }
+
+          var mat4 = new THREE.Matrix4();
+          sphere.matrix.identity();  // reset matrix
+
+          sphere.matrix.multiply(mat4.makeTranslation(timeX, timeY, timeZ)); // T1
+        }
+      }
+
+      function render() {
+        stats.update(); // Update FPS
+        var delta = clock.getDelta(); // Get the seconds passed since the time 'oldTime' was set and sets 'oldTime' to the current time.
+        trackballControls.update();
+        lightFollowingCamera(light, camera);
+        requestAnimationFrame(render);
+        moveSphere(xSlider, ySlider, zSlider, delta);
+        renderer.render(scene, camera) // Render scene
+      }
+    </script>
+  </div>
+</body>
+
+</html>
