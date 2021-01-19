@@ -1,19 +1,33 @@
 // Receive a initial position with Vector3 format
-function Kart(initialPosition) {
+function Kart(initialPosition = new THREE.Vector3(0, 0, 0)) {
   var DISTANCE_BETWEEN_WHEELS = 6;
   var DISTANCE_BETWEEN_AXLES = 6;
 
-  var stats = initStats(); // To show FPS information
-  var scene = new THREE.Scene(); // Create main scene
-  var renderer = initRenderer(); // View function in util/utils
-  var camera = initCamera(new THREE.Vector3(10, 5, 10)); // Init camera in this position
-  var light = initDefaultLighting(scene, new THREE.Vector3(0, 0, 15));
+  // Mostrar FPS
+  var stats = initStats(); 
+  // Criar Cena
+  var scene = new THREE.Scene(); 
+  // Inicializar o renderizador
+  var renderer = initRenderer(); 
+  // Configurando iluminação
+  var light = initDefaultLighting(scene, new THREE.Vector3(0, 10, 15));
+
+  // Configurando camera
+  var cameraPosition = new THREE.Vector3(0, -50, 20);
+  var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+  camera.position.copy(cameraPosition);
+  camera.lookAt(new THREE.Vector3(0, 0, 0)); 
+
   var clock = new THREE.Clock();
-  var keyboard = new KeyboardState(); // To use the keyboard
+  
+  // Configurando teclado
+  var keyboard = new KeyboardState();
   var trackballControls = new THREE.TrackballControls(
     camera,
     renderer.domElement
   );
+
+  // Matriz auxiliar
   var mat4 = new THREE.Matrix4();
   var angle = 1;
 
@@ -21,10 +35,30 @@ function Kart(initialPosition) {
   var axesHelper = new THREE.AxesHelper(12);
   scene.add(axesHelper);
 
+  // Plano
+  var planeGeometry = new THREE.PlaneGeometry(700, 700, 40, 40);
+  planeGeometry.translate(0.0, 0.0, -0.02); // To avoid conflict with the axeshelper
+  var planeMaterial = new THREE.MeshBasicMaterial({
+      color: "rgba(20, 30, 110)",
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1, // positive value pushes polygon further away
+      polygonOffsetUnits: 1
+  });
+  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  scene.add(plane);
+  var wireframe = new THREE.WireframeGeometry( planeGeometry );
+  var line = new THREE.LineSegments( wireframe );
+  line.material.color.setStyle( "rgb(180, 180, 180)" );
+  scene.add(line);
+
   // Eixo Principal
   var mainAxle = GenerateBar(DISTANCE_BETWEEN_AXLES);
   scene.add(mainAxle);
   mainAxle.rotateZ(degreesToRadians(90));
+  mainAxle.position.x = initialPosition.x;
+  mainAxle.position.y = initialPosition.y;
+  mainAxle.position.z = initialPosition.z;
 
   // Eixo Dianteiro
   var frontAxle = GenerateAxle(DISTANCE_BETWEEN_WHEELS, true);
@@ -76,6 +110,7 @@ function Kart(initialPosition) {
   function render() {
     stats.update(); // Update FPS
     trackballControls.update(); // Enable mouse movements
+    lightFollowingCamera(light, camera);
     requestAnimationFrame(render);
     keyboardUpdate();
     renderer.render(scene, camera); // Render scene
@@ -85,34 +120,29 @@ function Kart(initialPosition) {
 //*========================== Auxiliar Functions ==========================*
 function GenerateCareen(distanceBetweenWheels) {
   // Carenagem Principal
-  const mainCareen = GenerateBox(0.5, 4, 4);
+  const mainCareen = GenerateBox(0.5, 4, 4, '#FFA500');
 
-  const cabin1 = GenerateBox(0.5, 4, 1);
-  const cabin2 = GenerateBox(0.5, 4, 1);
+  // Carenagem da cabine
+  const cabin1 = GenerateBox(0.5, 4, 1, '#1a1a1a');
+  const cabin2 = GenerateBox(0.5, 4, 1, '#1a1a1a');
 
-  const seat = GenerateBox(1.5, 0.3, 2);
+  // Assento
+  const seat = GenerateBox(1.5, 0.3, 2, '#1a1a1a');
   mainCareen.add(seat);
   seat.translateY(-2).translateX(1);
 
-
-  // const geometryCy = new THREE.CylinderGeometry( 5, 1, 20, 3, 1, true, 0, 3.8 );
-  // const materialCy = new THREE.MeshBasicMaterial( {color: 'white'} );
-  // const cylinder = new THREE.Mesh( geometryCy, materialCy );
-
-  const panel = GenerateBox(1.4, 1, 2);
+  // Painel
+  const panel = GenerateBox(1.4, 1, 2, '#1a1a1a');
   mainCareen.add(panel);
   panel.translateX(0.5).translateY(1.5);
 
-  // panel.add(cylinder);
-  // cylinder.rotateX(degreesToRadians(180));
-
+  // Barra da direção
   const steeringWheelBar = GenerateBar(1);
   panel.add(steeringWheelBar);
   steeringWheelBar.translateX(0.5).translateY(-1);
 
-  const geometry = new THREE.CylinderGeometry( 0.5, 0.5, 0.1, 60 );
-  const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-  const steeringWheel = new THREE.Mesh( geometry, material );
+  // Volante
+  const steeringWheel = GenerateSteeringWheel('#1a1a1a');
   steeringWheelBar.add(steeringWheel);
   steeringWheel.translateY(-0.5)
 
@@ -125,22 +155,22 @@ function GenerateCareen(distanceBetweenWheels) {
   cabin2.translateZ(-1.5);
 
   // Carenagem Dianteira
-  const frontCareen = GenerateBox(0.5, 2, 2);
+  const frontCareen = GenerateBox(0.5, 2, 2, '#FFA500');
   mainCareen.add(frontCareen);
   frontCareen.translateY(distanceBetweenWheels / 2);
 
   // Para-choque Dianteiro
-  const frontBumper = GenerateBox(0.5, 1, 4);
+  const frontBumper = GenerateBox(0.5, 1, 4, '#FFA500');
   frontCareen.add(frontBumper);
   frontBumper.translateY(0.5);
 
   // Carenagem Traseira
-  const rearCareen = GenerateBox(1.0, 2, 2);
+  const rearCareen = GenerateBox(1.0, 2, 2, '#FFA500');
   mainCareen.add(rearCareen);
   rearCareen.translateY(-(distanceBetweenWheels / 2)).translateX(0.25);
 
   // Para-choque Traseiro
-  const rearBumper = GenerateBox(1.0, 1, 4);
+  const rearBumper = GenerateBox(1.0, 1, 4, '#FFA500');
   rearCareen.add(rearBumper);
   rearBumper.translateY(-0.5);
 
@@ -154,24 +184,30 @@ function GenerateCareen(distanceBetweenWheels) {
     .rotateZ(degreesToRadians(90))
     .translateZ(-1)
     .translateY(-1);
-  const airfoilPlate = GenerateBox(0.01, 1, 4);
+  const airfoilPlate = GenerateBox(0.01, 1, 4, '#FFA500');
   airfoilSupportBar1.add(airfoilPlate);
   airfoilPlate.rotateZ(degreesToRadians(90)).translateZ(-1).translateX(-0.5);
 
   return mainCareen;
 }
 
-function GenerateBox(width, height, depth) {
+function GenerateBox(width, height, depth, color) {
   const cubeGeometry = new THREE.BoxGeometry(width, height, depth);
-  const cubeMaterial = new THREE.MeshNormalMaterial();
+  const cubeMaterial = new THREE.MeshPhongMaterial({ color: color });
   const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
   return cube;
+}
+
+function GenerateSteeringWheel(color) {
+  const geometry = new THREE.CylinderGeometry( 0.5, 0.5, 0.1, 60 );
+  const material = new THREE.MeshPhongMaterial( {color: color } );
+  return new THREE.Mesh( geometry, material );
 }
 
 function GenerateBar(length) {
   const axleBarGeometry = new THREE.CylinderGeometry(0.1, 0.1, length, 25);
   const axleBarMaterial = new THREE.MeshPhongMaterial({
-    color: "rgb(100,255,100)",
+    color: "#c0c0c0",
   });
   const axleBar = new THREE.Mesh(axleBarGeometry, axleBarMaterial);
   return axleBar;
@@ -179,7 +215,7 @@ function GenerateBar(length) {
 
 function GenerateWheel() {
   const wheelGeometry = new THREE.TorusGeometry(0.8, 0.5, 16, 100);
-  const wheelMaterial = new THREE.MeshBasicMaterial({
+  const wheelMaterial = new THREE.MeshPhongMaterial({
     color: "gray",
   });
   const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
