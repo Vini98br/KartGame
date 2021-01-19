@@ -1,5 +1,5 @@
 // Receive a initial position with Vector3 format
-function Kart(initialPosition = new THREE.Vector3(0, 0, 0)) {
+function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   var DISTANCE_BETWEEN_WHEELS = 6;
   var DISTANCE_BETWEEN_AXLES = 6;
 
@@ -55,7 +55,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 0)) {
   // Eixo Principal
   var mainAxle = GenerateBar(DISTANCE_BETWEEN_AXLES);
   scene.add(mainAxle);
-  mainAxle.rotateZ(degreesToRadians(90));
+  mainAxle.rotateX(degreesToRadians(90)).rotateZ(degreesToRadians(90));
   mainAxle.position.x = initialPosition.x;
   mainAxle.position.y = initialPosition.y;
   mainAxle.position.z = initialPosition.z;
