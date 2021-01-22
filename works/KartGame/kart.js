@@ -17,15 +17,11 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   var upUp = false;
 
   // Configurando camera
-  var cameraPosition = new THREE.Vector3(0, -50, 20);
-  var camera = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    5000
-  );
-  camera.position.copy(cameraPosition);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  var camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 1000);
+  scene.add(camera);
+  camera.position.set(0,10,50);
+  camera.up.set(0,0,1);
+	// camera.lookAt(scene.position);
 
   var clock = new THREE.Clock();
 
@@ -63,18 +59,23 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
 
   // Eixo Principal
   var mainAxle = GenerateBar(DISTANCE_BETWEEN_AXLES);
-  mainAxle.matrixAutoUpdate = false;
-  mainAxle.matrix.identity();
-  mainAxle.matrix.multiply(mat4.makeRotationX(degreesToRadians(90)));
-  mainAxle.matrix.multiply(mat4.makeRotationZ(degreesToRadians(90)));
-  mainAxle.matrix.multiply(
-    mat4.makeTranslation(
-      initialPosition.x,
-      initialPosition.y,
-      initialPosition.z
-    )
-  );
+  // mainAxle.matrixAutoUpdate = false;
+  // mainAxle.matrix.identity();
+  // mainAxle.matrix.multiply(mat4.makeRotationX(degreesToRadians(90)));
+  // mainAxle.matrix.multiply(mat4.makeRotationZ(degreesToRadians(90)));
+  // mainAxle.matrix.multiply(
+  //   mat4.makeTranslation(
+  //     initialPosition.x,
+  //     initialPosition.y,
+  //     initialPosition.z
+  //   )
+  // );
   scene.add(mainAxle);
+
+  mainAxle.rotateX(degreesToRadians(90)).rotateZ(degreesToRadians(90));
+  mainAxle.position.x = initialPosition.x;
+  mainAxle.position.y = initialPosition.y;
+  mainAxle.position.z = initialPosition.z;
 
   // Eixo Dianteiro
   var frontAxle = GenerateAxle(DISTANCE_BETWEEN_WHEELS, true);
@@ -86,6 +87,8 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   mainAxle.add(rearAxle);
   rearAxle.translateZ(DISTANCE_BETWEEN_WHEELS / 2);
 
+  camera.lookAt(rearAxle.position);
+
   // Carenagem
   var mainCareen = GenerateCareen(DISTANCE_BETWEEN_WHEELS);
   mainAxle.add(mainCareen);
@@ -95,20 +98,37 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   function accelerate() {
     // Limitação de velocidade
     upUp = false;
-    if (speed < 1.5) {
+    if (speed < 2) {
       speed += acceleration;
       console.log(speed);
     }
-    mainAxle.matrix.multiply(mat4.makeTranslation(0, speed, initialPosition.z));
+    // mainAxle.matrix.multiply(mat4.makeTranslation(0, speed, initialPosition.z));
+    mainAxle.translateY(speed);
+  }
+
+  function moveCamera() {
+    var relativeCameraOffset = new THREE.Vector3(8,-120,0);
+    
+    console.log(mainAxle.position);
+    
+    var cameraOffset = relativeCameraOffset.applyMatrix4( mainAxle.matrixWorld);
+    
+    camera.position.x = cameraOffset.x;
+    camera.position.y = cameraOffset.y;
+    camera.position.z = cameraOffset.z;
+    
+     console.log("camera - " , camera.position);
+    camera.lookAt( mainAxle.position);
   }
 
   function brake() {
     if (speed > 0) {
       upUp = false;
       speed -= acceleration * 2;
-      mainAxle.matrix.multiply(
-        mat4.makeTranslation(0, speed, initialPosition.z)
-      );
+      mainAxle.translateY(speed);
+      // mainAxle.matrix.multiply(
+      //   mat4.makeTranslation(0, speed, initialPosition.z)
+      // );
     }
   }
   var angle;
@@ -117,10 +137,11 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   var contLeft = 0;
   function keyboardUpdate() {
     keyboard.update();
-    angle = degreesToRadians(speed * 3);
+    angle = degreesToRadians(speed * 2);
     if (keyboard.pressed("left")) {
       if (speed > 0) {
-        mainAxle.matrix.multiply(mat4.makeRotationX(angle));
+        // mainAxle.matrix.multiply(mat4.makeRotationX(angle));
+        mainAxle.rotateX(angle);
         if (contLeft <= 30) {
           contLeft++;
           contRight--;
@@ -131,7 +152,8 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     }
     if (keyboard.pressed("right")) {
       if (speed > 0) {
-        mainAxle.matrix.multiply(mat4.makeRotationX(-angle));
+        // mainAxle.matrix.multiply(mat4.makeRotationX(-angle));
+        mainAxle.rotateX(-angle);
         if (contRight <= 30) {
           contRight++;
           contLeft--;
@@ -145,6 +167,8 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     if (keyboard.up("up")) upUp = true;
 
     if (keyboard.pressed("space")) cube.position.set(0.0, 0.0, 2.0);
+
+    moveCamera();
   }
 
   function render() {
@@ -155,9 +179,10 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     keyboardUpdate();
     if (upUp && speed > 0) {
       speed -= acceleration;
-      mainAxle.matrix.multiply(
-        mat4.makeTranslation(0, speed, initialPosition.z)
-      );
+      // mainAxle.matrix.multiply(
+      //   mat4.makeTranslation(0, speed, initialPosition.z)
+      // );
+      mainAxle.translateY(speed);
     } else {
       upUp = false;
     }

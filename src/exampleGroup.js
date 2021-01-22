@@ -3,12 +3,12 @@ function main()
   var scene = new THREE.Scene();    // Create main scene
   var stats = initStats();          // To show FPS information
   var renderer = initRenderer();    // View function in util/utils
-    renderer.setClearColor("rgb(30, 30, 40)");
-  var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.lookAt(0, 0, 0);
-    camera.position.set(5,15,50);
-    camera.up.set( 0, 1, 0 );
-
+  renderer.setClearColor("rgb(30, 30, 40)");
+  var camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 1000);
+  scene.add(camera);
+	camera.position.set(0,10,50);
+	camera.lookAt(scene.position);
+    
   var clock = new THREE.Clock();
   var light = initDefaultLighting(scene, new THREE.Vector3(15, 17, 20)); // Use default light
   var lightSphere = createSphere(0.3, 10, 10);
@@ -33,8 +33,7 @@ function main()
 
   //-------------------------------------------------------------------
   // Start setting the group
-
-  group = new THREE.Group();
+  var group = new THREE.Group();
 
   // Show axes (parameter is size of each axis)
   var axesHelper = new THREE.AxesHelper( 12 );
@@ -83,7 +82,6 @@ function main()
 
   render();
 
-
   function createCylinder(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, color)
   {
     var geometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
@@ -127,8 +125,17 @@ function main()
 
     var angle = degreesToRadians(10);
     if ( keyboard.pressed("left") )  group.rotateY(  angle );
-  	if ( keyboard.pressed("right") ) group.rotateY( -angle );
-
+    if ( keyboard.pressed("right") ) group.rotateY( -angle );
+    
+    var relativeCameraOffset = new THREE.Vector3(0,50,200);
+    console.log(group.position);
+    var cameraOffset = relativeCameraOffset.applyMatrix4( group.matrix);
+    
+    camera.position.x = (-1) * cameraOffset.x;
+    camera.position.y = cameraOffset.y;
+    camera.position.z = cameraOffset.z;
+    console.log("camera", camera.position);
+    camera.lookAt( group.position );
   }
 
   function showInformation()
