@@ -15,6 +15,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   var speed = 0;
   var acceleration = 0.01;
   var upUp = false;
+  var downUp = false;
 
   // Configurando camera
   var cameraPosition = new THREE.Vector3(0, -50, 20);
@@ -103,6 +104,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   }
 
   function brake() {
+    downUp = false;
     if (speed > 0) {
       upUp = false;
       speed -= acceleration * 2;
@@ -143,6 +145,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     if (keyboard.pressed("up")) accelerate();
     if (keyboard.pressed("down")) brake();
     if (keyboard.up("up")) upUp = true;
+    if (keyboard.up("down")) downUp = true;
 
     if (keyboard.pressed("space")) cube.position.set(0.0, 0.0, 2.0);
   }
@@ -153,6 +156,14 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     lightFollowingCamera(light, camera);
     requestAnimationFrame(render);
     keyboardUpdate();
+
+    // if (downUp && speed > 0) {
+    //   speed -= acceleration;
+    //   mainAxle.matrix.multiply(
+    //     mat4.makeTranslation(0, speed, initialPosition.z)
+    //   );
+    // }
+
     if (upUp && speed > 0) {
       speed -= acceleration;
       mainAxle.matrix.multiply(
