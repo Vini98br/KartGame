@@ -82,11 +82,6 @@
         if (keyboard.pressed("up")) cameraPosition.z += 1;
         if (keyboard.pressed("down")) cameraPosition.z -= 1;
 
-        if (keyboard.pressed("A")) cameraLookingAt.x -= lookSpeed;
-        if (keyboard.pressed("D")) cameraLookingAt.x += lookSpeed;
-        if (keyboard.pressed("W")) cameraLookingAt.z += lookSpeed;
-        if (keyboard.pressed("S")) cameraLookingAt.z -= lookSpeed;
-
         var up = cameraUpVector.x;
         if (keyboard.pressed("E")) {
           up += 0.01;

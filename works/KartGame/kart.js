@@ -12,19 +12,56 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
   // Configurando iluminação
   var light = initDefaultLighting(scene, new THREE.Vector3(0, 10, 15));
 
+  // Configurando do relógio
+  var clock = new THREE.Clock();
+
+  // Configuração da velocidade inicial
   var speed = 0;
+  // Configuração da aceleração
   var acceleration = 0.01;
+  // Velocidade máxima
+  var maxSpeed = 3;
+
+  // Add camera de inspeção
+  var inspectionCamera = new THREE.PerspectiveCamera(
+    10,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  // Modo de camera
+  var gameModeCamera = true;
+  // Configura o foco da camera de inspeção
+  var inspectionCameraFocus = initialPosition;
+  // Configura a posição da camera de inspeção
+  var inspectionCameraPosition = new THREE.Vector3(3, -70, 20);
+  // Configura o up da camera de inspeção
+  var inspectionCameraUp = new THREE.Vector3(0, 0, 1);
+  // Configura o ângulo da camera de inspeção
+  var inspectionCameraAngle = 0;
+  // Configura velocidade da camera de inspeção
+  var inspectionCameraSpeed = 10;
+  // Configura aceleração da camera de inspeção
+  var inspectionCameraAcceleration = inspectionCameraSpeed * clock.getDelta();
+
+  // Flag pra quando a seta pra cima é solta
   var upUp = false;
-  var downUp = false;
+
+  // Angulo de rotação do kart
+  var kartRotationAngle = 0;
+  // Angulo de rotação das rodas
+  var wheelRotationAngle = 90;
 
   // Configurando camera
-  var camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 1000);
+  var camera = new THREE.PerspectiveCamera(
+    10,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
   scene.add(camera);
-  camera.position.set(0,10,50);
-  camera.up.set(0,0,1);
-	// camera.lookAt(scene.position);
-
-  var clock = new THREE.Clock();
+  camera.position.set(0, 10, 50);
+  camera.up.set(0, 0, 1);
 
   // Configurando teclado
   var keyboard = new KeyboardState();
@@ -33,166 +70,212 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     renderer.domElement
   );
 
-  // Matriz auxiliar
-  var mat4 = new THREE.Matrix4();
-  // var angle = 1;
-
-  // Show world axes
-  var axesHelper = new THREE.AxesHelper(12);
-  scene.add(axesHelper);
-
   // Plano
-  var planeGeometry = new THREE.PlaneGeometry(700, 700, 40, 40);
-  planeGeometry.translate(0.0, 0.0, -0.02); // To avoid conflict with the axeshelper
-  var planeMaterial = new THREE.MeshBasicMaterial({
-    color: "rgba(20, 30, 110)",
-    side: THREE.DoubleSide,
-    polygonOffset: true,
-    polygonOffsetFactor: 1, // positive value pushes polygon further away
-    polygonOffsetUnits: 1,
-  });
-  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  var plane = GroundPlane();
   scene.add(plane);
-  var wireframe = new THREE.WireframeGeometry(planeGeometry);
-  var line = new THREE.LineSegments(wireframe);
-  line.material.color.setStyle("rgb(180, 180, 180)");
-  scene.add(line);
+  scene.add(plane.line);
 
   // Eixo Principal
   var mainAxle = GenerateBar(DISTANCE_BETWEEN_AXLES);
-  // mainAxle.matrixAutoUpdate = false;
-  // mainAxle.matrix.identity();
-  // mainAxle.matrix.multiply(mat4.makeRotationX(degreesToRadians(90)));
-  // mainAxle.matrix.multiply(mat4.makeRotationZ(degreesToRadians(90)));
-  // mainAxle.matrix.multiply(
-  //   mat4.makeTranslation(
-  //     initialPosition.x,
-  //     initialPosition.y,
-  //     initialPosition.z
-  //   )
-  // );
-  scene.add(mainAxle);
-
   mainAxle.rotateX(degreesToRadians(90)).rotateZ(degreesToRadians(90));
   mainAxle.position.x = initialPosition.x;
   mainAxle.position.y = initialPosition.y;
   mainAxle.position.z = initialPosition.z;
+  scene.add(mainAxle);
 
   // Eixo Dianteiro
-  var frontAxle = GenerateAxle(DISTANCE_BETWEEN_WHEELS, true);
+  var frontAxle = Axle(DISTANCE_BETWEEN_WHEELS);
   mainAxle.add(frontAxle);
   frontAxle.translateZ(-(DISTANCE_BETWEEN_WHEELS / 2));
 
   // Eixo Traseiro
-  var rearAxle = GenerateAxle(DISTANCE_BETWEEN_WHEELS, false);
+  var rearAxle = Axle(DISTANCE_BETWEEN_WHEELS);
   mainAxle.add(rearAxle);
   rearAxle.translateZ(DISTANCE_BETWEEN_WHEELS / 2);
-
   camera.lookAt(rearAxle.position);
 
   // Carenagem
-  var mainCareen = GenerateCareen(DISTANCE_BETWEEN_WHEELS);
+  var mainCareen = Careen(DISTANCE_BETWEEN_WHEELS);
   mainAxle.add(mainCareen);
+
+  // Velocímetro
+  var speedometer = new SecondaryBox("Velocidade: " + speed);
 
   render();
 
+  // Aceleração do Kart
   function accelerate() {
-    // Limitação de velocidade
     upUp = false;
-    if (speed < 2) {
+    // Limitação de velocidade
+    if (speed < maxSpeed) {
       speed += acceleration;
-      console.log(speed);
     }
-    // mainAxle.matrix.multiply(mat4.makeTranslation(0, speed, initialPosition.z));
     mainAxle.translateY(speed);
   }
 
-  function moveCamera() {
-    var relativeCameraOffset = new THREE.Vector3(8,-120,0);
-    
-    console.log(mainAxle.position);
-    
-    var cameraOffset = relativeCameraOffset.applyMatrix4( mainAxle.matrixWorld);
-    
-    camera.position.x = cameraOffset.x;
-    camera.position.y = cameraOffset.y;
-    camera.position.z = cameraOffset.z;
-    
-     console.log("camera - " , camera.position);
-    camera.lookAt( mainAxle.position);
-  }
-
+  // Freio do Kart
   function brake() {
     downUp = false;
     if (speed > 0) {
       upUp = false;
       speed -= acceleration * 2;
       mainAxle.translateY(speed);
-      // mainAxle.matrix.multiply(
-      //   mat4.makeTranslation(0, speed, initialPosition.z)
-      // );
     }
   }
-  var angle;
-  var wheelAngle = degreesToRadians(1);
-  var contRight = 0;
-  var contLeft = 0;
+
+  function moveGameCamera() {
+    var relativeCameraOffset = new THREE.Vector3(8, -120, 0);
+
+    var cameraOffset = relativeCameraOffset.applyMatrix4(mainAxle.matrixWorld);
+
+    camera.position.x = cameraOffset.x;
+    camera.position.y = cameraOffset.y;
+    camera.position.z = cameraOffset.z;
+
+    camera.lookAt(mainAxle.position);
+  }
+
+  var gameModeControls = new InfoBox();
+  var inspectionModeControls = new InfoBox();
+  configureInfoBox(gameModeControls, true);
+  configureInfoBox(inspectionModeControls, false);
+  inspectionModeControls.infoBox.style.display = 'none';
+
+  function changeCameraMode() {
+    gameModeCamera = !gameModeCamera;
+    // mainAxle.position.copy()
+    if (gameModeCamera) {
+      // Caixa de informações
+      showElement(gameModeControls.infoBox);
+      hideElement(inspectionModeControls.infoBox);
+
+      showElement(document.getElementById('game-mode'));
+      setTimeout(() => {
+        hideElement(document.getElementById('game-mode'));
+      }, 1000);
+      scene.add(plane);
+      scene.add(plane.line);
+    }
+    else {
+      // Caixa de informações
+      showElement(inspectionModeControls.infoBox);
+      hideElement(gameModeControls.infoBox);
+
+      showElement(document.getElementById('inspection-mode'));
+      setTimeout(() => {
+        hideElement(document.getElementById('inspection-mode'));
+      }, 1000);
+      
+      scene.remove(plane);
+      scene.remove(plane.line);
+      mainAxle.position.x = initialPosition.x;
+      mainAxle.position.y = initialPosition.y;
+      mainAxle.position.z = initialPosition.z;
+      inspectionCameraFocus = initialPosition;
+      inspectionCameraPosition = new THREE.Vector3(3, -70, 20);
+      inspectionCameraUp = new THREE.Vector3(0, 0, 1);
+      moveInspectionCamera();
+    }
+  }
+
+  function moveInspectionCamera() {
+    camera.position.copy(inspectionCameraPosition);
+    camera.lookAt(inspectionCameraFocus);
+    camera.up.copy(inspectionCameraUp);
+  }
+
+  function moveWheel() {
+    frontAxle.rightWheel.rotation.set(
+      degreesToRadians(wheelRotationAngle),
+      frontAxle.rightWheel.rotation.y,
+      0
+    );
+    frontAxle.leftWheel.rotation.set(
+      degreesToRadians(wheelRotationAngle),
+      frontAxle.leftWheel.rotation.y,
+      0
+    );
+  }
+
   function keyboardUpdate() {
     keyboard.update();
-    angle = degreesToRadians(speed * 2);
-    if (keyboard.pressed("left")) {
-      if (speed > 0) {
-        // mainAxle.matrix.multiply(mat4.makeRotationX(angle));
-        mainAxle.rotateX(angle);
-        if (contLeft <= 30) {
-          contLeft++;
-          contRight--;
-          frontAxle.rightWheel.matrix.multiply(mat4.makeRotationX(wheelAngle));
-          frontAxle.leftWheel.matrix.multiply(mat4.makeRotationX(wheelAngle));
+    kartRotationAngle = degreesToRadians(speed);
+    if (gameModeCamera) {
+      speedometer.box.style.display = 'block';
+      if (keyboard.pressed("left")) {
+        mainAxle.rotateX(kartRotationAngle);
+        if (wheelRotationAngle <= 35 + 90) {
+          wheelRotationAngle += 6;
         }
-      }
-    }
-    if (keyboard.pressed("right")) {
-      if (speed > 0) {
-        // mainAxle.matrix.multiply(mat4.makeRotationX(-angle));
-        mainAxle.rotateX(-angle);
-        if (contRight <= 30) {
-          contRight++;
-          contLeft--;
-          frontAxle.rightWheel.matrix.multiply(mat4.makeRotationX(-wheelAngle));
-          frontAxle.leftWheel.matrix.multiply(mat4.makeRotationX(-wheelAngle));
+      } else if (keyboard.pressed("right")) {
+        mainAxle.rotateX(-kartRotationAngle);
+        if (wheelRotationAngle >= -35 + 90) {
+          wheelRotationAngle -= 6;
         }
+      } else {
+        if (wheelRotationAngle !== 90 && wheelRotationAngle > 90)
+          wheelRotationAngle += 6 * -1;
+        else if (wheelRotationAngle !== 90 && wheelRotationAngle < 90)
+          wheelRotationAngle += 6 * 1;
       }
+
+      if (keyboard.pressed("up")) accelerate();
+      if (keyboard.pressed("down")) brake();
+      if (keyboard.up("up")) upUp = true;
+
+      moveGameCamera();
+    } else {
+      speedometer.box.style.display = 'none';
+      // Alterando a posição em x e z
+      if (keyboard.pressed("up")) {
+        inspectionCameraPosition.z += inspectionCameraAcceleration;
+        console.log(inspectionCameraUp.z);
+      }
+      if (keyboard.pressed("down"))
+        inspectionCameraPosition.z -= inspectionCameraAcceleration;
+      if (keyboard.pressed("left"))
+        inspectionCameraPosition.x -= inspectionCameraAcceleration;
+      if (keyboard.pressed("right"))
+        inspectionCameraPosition.x += inspectionCameraAcceleration;
+
+      // Modificando para onde a câmera aponta
+      if (keyboard.pressed("D"))
+        inspectionCameraFocus.x += inspectionCameraAcceleration;
+      if (keyboard.pressed("A"))
+        inspectionCameraFocus.x -= inspectionCameraAcceleration;
+      if (keyboard.pressed("W"))
+        inspectionCameraFocus.z += inspectionCameraAcceleration;
+      if (keyboard.pressed("S"))
+        inspectionCameraFocus.z -= inspectionCameraAcceleration;
+
+      // Modificando o vetor up
+      if (keyboard.pressed("Q")) {
+        inspectionCameraAngle += 0.01;
+        inspectionCameraUp.x = Math.sin(inspectionCameraAngle);
+        inspectionCameraUp.z = Math.cos(inspectionCameraAngle);
+      }
+      if (keyboard.pressed("E")) {
+        inspectionCameraAngle -= 0.01;
+        inspectionCameraUp.x = Math.sin(inspectionCameraAngle);
+        inspectionCameraUp.z = Math.cos(inspectionCameraAngle);
+      }
+      moveInspectionCamera();
     }
-    if (keyboard.pressed("up")) accelerate();
-    if (keyboard.pressed("down")) brake();
-    if (keyboard.up("up")) upUp = true;
-    if (keyboard.up("down")) downUp = true;
-
-    if (keyboard.pressed("space")) cube.position.set(0.0, 0.0, 2.0);
-
-    moveCamera();
+    if (keyboard.down("space")) changeCameraMode();
   }
 
   function render() {
-    stats.update(); // Update FPS
-    trackballControls.update(); // Enable mouse movements
+    stats.update();
+    if (speed < 0) speedometer.changeMessage("Velocidade: " + 0.0);
+    else speedometer.changeMessage("Velocidade: " + (speed * 30).toFixed(1));
+    trackballControls.update();
     lightFollowingCamera(light, camera);
     requestAnimationFrame(render);
+    moveWheel();
     keyboardUpdate();
-
-    // if (downUp && speed > 0) {
-    //   speed -= acceleration;
-    //   mainAxle.matrix.multiply(
-    //     mat4.makeTranslation(0, speed, initialPosition.z)
-    //   );
-    // }
 
     if (upUp && speed > 0) {
       speed -= acceleration;
-      // mainAxle.matrix.multiply(
-      //   mat4.makeTranslation(0, speed, initialPosition.z)
-      // );
       mainAxle.translateY(speed);
     } else {
       upUp = false;
@@ -202,7 +285,26 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
 }
 
 //*========================== Auxiliar Functions ==========================*
-function GenerateCareen(distanceBetweenWheels) {
+function GroundPlane() {
+  const planeGeometry = new THREE.PlaneGeometry(700, 700, 40, 40);
+  planeGeometry.translate(0.0, 0.0, -0.02);
+  const planeMaterial = new THREE.MeshBasicMaterial({
+    color: "rgba(20, 30, 110)",
+    side: THREE.DoubleSide,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  const wireframe = new THREE.WireframeGeometry(planeGeometry);
+  const line = new THREE.LineSegments(wireframe);
+  line.material.color.setStyle("rgb(180, 180, 180)");
+  plane.geometry = planeGeometry;
+  plane.line = line;
+  return plane;
+}
+
+function Careen(distanceBetweenWheels) {
   // Carenagem Principal
   const mainCareen = GenerateBox(0.5, 4, 4, "#FFA500");
 
@@ -226,7 +328,7 @@ function GenerateCareen(distanceBetweenWheels) {
   steeringWheelBar.translateX(0.5).translateY(-1);
 
   // Volante
-  const steeringWheel = GenerateSteeringWheel("#1a1a1a");
+  const steeringWheel = SteeringWheel("#1a1a1a");
   steeringWheelBar.add(steeringWheel);
   steeringWheel.translateY(-0.5);
 
@@ -275,17 +377,17 @@ function GenerateCareen(distanceBetweenWheels) {
   return mainCareen;
 }
 
+function SteeringWheel(color) {
+  const geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 60);
+  const material = new THREE.MeshPhongMaterial({ color: color });
+  return new THREE.Mesh(geometry, material);
+}
+
 function GenerateBox(width, height, depth, color) {
   const cubeGeometry = new THREE.BoxGeometry(width, height, depth);
   const cubeMaterial = new THREE.MeshPhongMaterial({ color: color });
   const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
   return cube;
-}
-
-function GenerateSteeringWheel(color) {
-  const geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 60);
-  const material = new THREE.MeshPhongMaterial({ color: color });
-  return new THREE.Mesh(geometry, material);
 }
 
 function GenerateBar(length) {
@@ -297,7 +399,7 @@ function GenerateBar(length) {
   return axleBar;
 }
 
-function GenerateWheel() {
+function Wheel() {
   const wheelGeometry = new THREE.TorusGeometry(0.8, 0.5, 16, 100);
   const wheelMaterial = new THREE.MeshPhongMaterial({
     color: "gray",
@@ -312,8 +414,7 @@ function GenerateSphere(color) {
   return new THREE.Mesh(sphereGeometry, sphereMaterial);
 }
 
-function GenerateAxle(distance, isFront) {
-  const mat4 = new THREE.Matrix4();
+function Axle(distance) {
   const translation = distance / 2;
 
   // Calota Esquerda
@@ -331,39 +432,13 @@ function GenerateAxle(distance, isFront) {
   hubcapRight.translateY(-translation);
 
   // Roda esquerda
-  const leftWheel = GenerateWheel();
-  if (isFront) {
-    leftWheel.matrixAutoUpdate = false;
-    leftWheel.matrix.identity();
-    leftWheel.matrix.multiply(mat4.makeRotationX(degreesToRadians(90)));
-    leftWheel.matrix.multiply(
-      mat4.makeTranslation(
-        leftWheel.position.x,
-        leftWheel.position.y,
-        translation
-      )
-    );
-  } else {
-    leftWheel.rotateX(degreesToRadians(90)).translateZ(translation);
-  }
+  const leftWheel = Wheel();
+  leftWheel.rotateX(degreesToRadians(90)).translateZ(translation);
   axleBar.add(leftWheel);
 
   // Roda direita
-  const rightWheel = GenerateWheel();
-  if (isFront) {
-    rightWheel.matrixAutoUpdate = false;
-    rightWheel.matrix.identity();
-    rightWheel.matrix.multiply(mat4.makeRotationX(degreesToRadians(90)));
-    rightWheel.matrix.multiply(
-      mat4.makeTranslation(
-        rightWheel.position.x,
-        rightWheel.position.y,
-        -translation
-      )
-    );
-  } else {
-    rightWheel.rotateX(degreesToRadians(90)).translateZ(-translation);
-  }
+  const rightWheel = Wheel();
+  rightWheel.rotateX(degreesToRadians(90)).translateZ(-translation);
   axleBar.add(rightWheel);
 
   // Incluir as rodas no retorno para manipulação das mesmas
@@ -371,4 +446,27 @@ function GenerateAxle(distance, isFront) {
   axleBar.leftWheel = leftWheel;
 
   return axleBar;
+}
+
+function configureInfoBox(controls, gameMode) {
+  controls.add("Kart Game");
+  controls.addParagraph();
+  if(gameMode) {
+    controls.add("⬆ Para acelerar");
+    controls.add("⬇ Para frear");
+    controls.add("⬅ Para virar para esquerda");
+    controls.add("➡ Para virar para direita");
+  } else {
+    controls.add("⬆ ⬇ ⬅ ➡ Para movimentar a camera");
+  }
+  controls.add("space para trocar o modo da câmera");
+  controls.show();
+}
+
+function showElement(elm) {
+  elm.style.display = 'block';
+}
+
+function hideElement(elm) {
+  elm.style.display = 'none';
 }
