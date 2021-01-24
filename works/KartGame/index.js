@@ -59,7 +59,7 @@ function main() {
   scene.add(plane.line);
 
   // Kart
-  var kart = Kart(kartInitialPosition, camera, gameModeCamera);
+  var kart = Kart(kartInitialPosition);
   scene.add(kart);
   // Fazendo a camera "olhar" para o eixo traseiro do kart
   camera.lookAt(kart.rearAxle.position);
@@ -82,7 +82,6 @@ function main() {
       return;
     }
     gameModeCamera = !gameModeCamera;
-    // mainAxle.position.copy()
     resetKart();
     if (gameModeCamera) {
       message("game-mode");
@@ -108,8 +107,11 @@ function main() {
     camera.up.set(0, 0, 1);
     var relativeCameraOffset = new THREE.Vector3(8, -120, 0);
 
+    // Cálculo da distância entre a câmera e o kart utilizando a posição do
+    // kart como matriz de transformação do Vector3 para Matrix4
     var cameraOffset = relativeCameraOffset.applyMatrix4(kart.matrixWorld);
 
+    // Posiciona a câmera de acordo com distância calculada
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
@@ -129,7 +131,7 @@ function main() {
     camera.up.set(0, 0, 1);
   }
 
-  // Resetar kart para posição inicial
+  // Resetar kart para posição, rotação e velocidade inicial
   function resetKart() {
     kart.position.copy(kartInitialPosition);
     kart.rotation.set(degreesToRadians(90), 0, degreesToRadians(90));
@@ -166,6 +168,7 @@ function main() {
     downUp = false;
     if (speed > 0) {
       upUp = false;
+      // Freio para 2x mais rápido que apenas soltar o acelerador
       speed -= acceleration * 2;
       kart.translateY(speed);
     }
@@ -199,6 +202,8 @@ function main() {
         wheelRotationAngle -= 6;
       }
     } else {
+      // Voltar a roda a rotação inicial se não estiver apertando seta pra esquerda
+      // nem a direita
       if (wheelRotationAngle !== 90 && wheelRotationAngle > 90)
         wheelRotationAngle -= 6;
       else if (wheelRotationAngle !== 90 && wheelRotationAngle < 90)
