@@ -446,9 +446,11 @@ function configureInfoBox(controls, gameMode) {
     controls.add("➡ Para virar para direita");
   } else {
     hideElement(controls.infoBox);
-    controls.add("⬆ ⬇ ⬅ ➡ Para movimentar a camera");
+    controls.add("[mouse click] Para movimentar a camera");
+    controls.add("[scroll up] Para dar zoom");
+    controls.add("[scroll down] Para remover zoom");
   }
-  controls.add("space para trocar o modo da câmera");
+  controls.add("[space] para trocar o modo da câmera");
   controls.show();
 
   return controls;
