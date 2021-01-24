@@ -7,8 +7,6 @@ function main() {
   var renderer = initRenderer();
   // Configurando iluminação
   var light = initDefaultLighting(scene, new THREE.Vector3(0, 10, 15));
-  // Instância auxiliar de relógio
-  var clock = new THREE.Clock();
 
   // Posição inicial do kart
   var kartInitialPosition = new THREE.Vector3(1.2, 0, 2);
@@ -29,27 +27,8 @@ function main() {
   var gameModeCamera = true;
   // Caixa de informações modo Jogo
   var gameModeControls = configureInfoBox(new InfoBox(), true);
-
   // Caixa de informações modo inspeção
   var inspectionModeControls = configureInfoBox(new InfoBox(), false);
-  // Configura o foco da camera de inspeção
-  var inspectionCameraFocus = kartInitialPosition;
-  // Configura a posição da camera de inspeção
-  var inspectionCameraPosition = new THREE.Vector3(3, -70, 20);
-  // Configura o up da camera de inspeção
-  var inspectionCameraUp = new THREE.Vector3(0, 0, 1);
-  // Configura velocidade da camera de inspeção
-  var inspectionCameraSpeed = 10;
-  // Configura aceleração da camera de inspeção
-  var inspectionCameraAcceleration = inspectionCameraSpeed * clock.getDelta();
-  // Configura o foco da camera de inspeção
-  var inspectionCameraFocus = kartInitialPosition;
-  // Configura a posição da camera de inspeção
-  var inspectionCameraPosition = new THREE.Vector3(3, -70, 20);
-  // Configura o up da camera de inspeção
-  var inspectionCameraUp = new THREE.Vector3(0, 0, 1);
-  // Configura o ângulo da camera de inspeção
-  var inspectionCameraAngle = 0;
 
   // Instância do teclado
   var keyboard = new KeyboardState();
@@ -57,14 +36,6 @@ function main() {
   var upUp = false;
   // Flag pra quando a seta pra baixo é solta
   var downUp = false;
-
-  // Add camera de inspeção
-  var inspectionCamera = new THREE.PerspectiveCamera(
-    10,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
 
   // Configurando câmera
   var camera = new THREE.PerspectiveCamera(
@@ -112,6 +83,7 @@ function main() {
     }
     gameModeCamera = !gameModeCamera;
     // mainAxle.position.copy()
+    resetKart();
     if (gameModeCamera) {
       message("game-mode");
       showElement(gameModeControls.infoBox);
@@ -119,6 +91,7 @@ function main() {
 
       scene.add(plane);
       scene.add(plane.line);
+      moveGameCamera();
     } else {
       message("inspection-mode");
       showElement(inspectionModeControls.infoBox);
@@ -126,18 +99,13 @@ function main() {
 
       scene.remove(plane);
       scene.remove(plane.line);
-      kart.position.x = kartInitialPosition.x;
-      kart.position.y = kartInitialPosition.y;
-      kart.position.z = kartInitialPosition.z;
-      inspectionCameraFocus = kartInitialPosition;
-      // inspectionCameraPosition = new THREE.Vector3(3, -70, 20);
-      // inspectionCameraUp = new THREE.Vector3(0, 0, 1);
-      // moveInspectionCamera();
+      moveInspectionCamera();
     }
   }
 
   // Função que lida com movimentação da camera no modo Jogo
   function moveGameCamera() {
+    camera.up.set(0, 0, 1);
     var relativeCameraOffset = new THREE.Vector3(8, -120, 0);
 
     var cameraOffset = relativeCameraOffset.applyMatrix4(kart.matrixWorld);
@@ -151,9 +119,21 @@ function main() {
 
   // Função que lida com movimentação da camera no modo Inspeção
   function moveInspectionCamera() {
-    camera.position.copy(inspectionCameraPosition);
-    camera.lookAt(inspectionCameraFocus);
-    camera.up.copy(inspectionCameraUp);
+    var distanceX = 8;
+    var distanceY = -80;
+    var distanceZ = 40;
+    camera.position.x = kartInitialPosition.x - distanceX;
+    camera.position.y = kartInitialPosition.y - distanceY;
+    camera.position.z = kartInitialPosition.z + distanceZ;
+    camera.lookAt(kart.position);
+    camera.up.set(0, 0, 1);
+  }
+
+  // Resetar kart para posição inicial
+  function resetKart() {
+    kart.position.copy(kartInitialPosition);
+    kart.rotation.set(degreesToRadians(90), 0, degreesToRadians(90));
+    speed = 0;
   }
 
   // Função que lida com movimentação das rodas
@@ -196,66 +176,35 @@ function main() {
     keyboard.update();
     kartRotationAngle = degreesToRadians(speed);
     if (gameModeCamera) {
+      // Mostrar velocímetro
       showElement(speedometer.box);
-      if (keyboard.pressed("left")) {
-        kart.rotateX(kartRotationAngle);
-        if (wheelRotationAngle <= 125) {
-          wheelRotationAngle += 6;
-        }
-      } else if (keyboard.pressed("right")) {
-        kart.rotateX(-kartRotationAngle);
-        if (wheelRotationAngle >= 55) {
-          wheelRotationAngle -= 6;
-        }
-      } else {
-        if (wheelRotationAngle !== 90 && wheelRotationAngle > 90)
-          wheelRotationAngle -= 6;
-        else if (wheelRotationAngle !== 90 && wheelRotationAngle < 90)
-          wheelRotationAngle += 6;
-      }
 
       if (keyboard.pressed("up")) accelerate();
       if (keyboard.pressed("down")) brake();
       if (keyboard.up("down")) downUp = true;
       if (keyboard.up("up")) upUp = true;
-      moveGameCamera();
     } else {
+      // Esconder velocímetro
       hideElement(speedometer.box);
-      // Alterando a posição em x e z
-      if (keyboard.pressed("up")) {
-        inspectionCameraPosition.z += inspectionCameraAcceleration;
-        console.log(inspectionCameraUp.z);
-      }
-      if (keyboard.pressed("down"))
-        inspectionCameraPosition.z -= inspectionCameraAcceleration;
-      if (keyboard.pressed("left"))
-        inspectionCameraPosition.x -= inspectionCameraAcceleration;
-      if (keyboard.pressed("right"))
-        inspectionCameraPosition.x += inspectionCameraAcceleration;
-
-      // Modificando para onde a câmera aponta
-      if (keyboard.pressed("D"))
-        inspectionCameraFocus.x += inspectionCameraAcceleration;
-      if (keyboard.pressed("A"))
-        inspectionCameraFocus.x -= inspectionCameraAcceleration;
-      if (keyboard.pressed("W"))
-        inspectionCameraFocus.z += inspectionCameraAcceleration;
-      if (keyboard.pressed("S"))
-        inspectionCameraFocus.z -= inspectionCameraAcceleration;
-
-      // Modificando o vetor up
-      if (keyboard.pressed("Q")) {
-        inspectionCameraAngle += 0.01;
-        inspectionCameraUp.x = Math.sin(inspectionCameraAngle);
-        inspectionCameraUp.z = Math.cos(inspectionCameraAngle);
-      }
-      if (keyboard.pressed("E")) {
-        inspectionCameraAngle -= 0.01;
-        inspectionCameraUp.x = Math.sin(inspectionCameraAngle);
-        inspectionCameraUp.z = Math.cos(inspectionCameraAngle);
-      }
-      moveInspectionCamera();
     }
+
+    if (keyboard.pressed("left")) {
+      kart.rotateX(kartRotationAngle);
+      if (wheelRotationAngle <= 125) {
+        wheelRotationAngle += 6;
+      }
+    } else if (keyboard.pressed("right")) {
+      kart.rotateX(-kartRotationAngle);
+      if (wheelRotationAngle >= 55) {
+        wheelRotationAngle -= 6;
+      }
+    } else {
+      if (wheelRotationAngle !== 90 && wheelRotationAngle > 90)
+        wheelRotationAngle -= 6;
+      else if (wheelRotationAngle !== 90 && wheelRotationAngle < 90)
+        wheelRotationAngle += 6;
+    }
+
     if (keyboard.down("space")) changeCameraMode();
   }
 
@@ -269,6 +218,7 @@ function main() {
     requestAnimationFrame(render);
     keyboardUpdate();
     moveWheel();
+    if (gameModeCamera) moveGameCamera();
 
     if ((upUp || downUp) && speed > 0) {
       speed -= acceleration;
