@@ -6,7 +6,9 @@ function main() {
   // Inicializar o renderizador
   var renderer = initRenderer();
   // Configurando iluminação
-  var light = initDefaultLighting(scene, new THREE.Vector3(0, 10, 15));
+  var dirLight = new THREE.DirectionalLight('#fff');
+  setDirectionalLighting(dirLight, scene, new THREE.Vector3(0, 10, 15))
+  // var light = initDefaultLighting(scene, new THREE.Vector3(0, 10, 15));
 
   // Posição inicial do kart
   var kartInitialPosition = new THREE.Vector3(1.2, 0, 2);
@@ -17,7 +19,11 @@ function main() {
   // Velocidade máxima
   var maxSpeed = 4;
   // Configuração da aceleração
-  var acceleration = 0.01;
+  var acceleration = 0.02;
+  // Fator da força do freio do kart
+  var breakFactor = 3;
+  // Fator da força da fricção do kart
+  var frictionFactor = 2;
   // Configuração da velocidade inicial
   var speed = 0;
   // Velocímetro
@@ -90,6 +96,7 @@ function main() {
 
       scene.add(plane);
       scene.add(plane.line);
+      trackballControls.enabled = false;
       moveGameCamera();
     } else {
       message("inspection-mode");
@@ -98,6 +105,7 @@ function main() {
 
       scene.remove(plane);
       scene.remove(plane.line);
+      trackballControls.enabled = true;
       moveInspectionCamera();
     }
   }
@@ -168,8 +176,8 @@ function main() {
     downUp = false;
     if (speed > 0) {
       upUp = false;
-      // Freio para 2x mais rápido que apenas soltar o acelerador
-      speed -= acceleration * 2;
+      // Freio para o Kart mais rápido que a apenas a fricção do mesmo
+      speed -= breakFactor * acceleration;
       kart.translateY(speed);
     }
   }
@@ -177,7 +185,7 @@ function main() {
   // Função para lidar com atualizações no teclado
   function keyboardUpdate() {
     keyboard.update();
-    kartRotationAngle = degreesToRadians(speed);
+    kartRotationAngle = degreesToRadians(speed/2);
     if (gameModeCamera) {
       // Mostrar velocímetro
       showElement(speedometer.box);
@@ -218,7 +226,12 @@ function main() {
     if (speed < 0) speedometer.changeMessage("Velocidade: " + 0.0);
     else speedometer.changeMessage("Velocidade: " + (speed * 30).toFixed(1));
     stats.update();
-    trackballControls.update();
+    if(gameModeCamera) {
+      if(trackballControls.enabled)
+        trackballControls.enabled = false;
+    } else {
+      trackballControls.update();
+    }
     lightFollowingCamera(light, camera);
     requestAnimationFrame(render);
     keyboardUpdate();
@@ -226,7 +239,7 @@ function main() {
     if (gameModeCamera) moveGameCamera();
 
     if ((upUp || downUp) && speed > 0) {
-      speed -= acceleration;
+      speed -= frictionFactor * acceleration;
       kart.translateY(speed);
     } else {
       upUp = false;
@@ -477,4 +490,21 @@ function message(elm) {
   setTimeout(() => {
     hideElement(document.getElementById(elm));
   }, 1000);
+}
+
+function setDirectionalLighting(light, scene, position)
+{
+  light.position.copy(position);
+  light.shadow.mapSize.width = 2048;
+  light.shadow.mapSize.height = 2048;
+  light.castShadow = true;
+
+  light.shadow.camera.left = -200;
+  light.shadow.camera.right = 200;
+  light.shadow.camera.top = 200;
+  light.shadow.camera.bottom = -200;
+  light.name = "Direction Light";
+  light.visible = true;
+
+  scene.add(light);
 }
