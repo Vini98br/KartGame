@@ -39,7 +39,7 @@ function main() {
 
   // Configurando câmera
   var camera = new THREE.PerspectiveCamera(
-    10,
+    60,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -106,7 +106,7 @@ function main() {
   // Função que lida com movimentação da camera no modo Jogo
   function moveGameCamera() {
     camera.up.set(0, 0, 1);
-    var relativeCameraOffset = new THREE.Vector3(8, -120, 0);
+    var relativeCameraOffset = new THREE.Vector3(15, -35, 0);
 
     var cameraOffset = relativeCameraOffset.applyMatrix4(kart.matrixWorld);
 
