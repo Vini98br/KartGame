@@ -247,10 +247,10 @@ function initDefaultLighting(scene, initialPosition) {
 /*
  * Sphere to represent light position
  */
-function createLightSphere(scene, radius, widthSegments, heightSegments, position)
+function createLightSphere(scene, radius, widthSegments, heightSegments, position, color = 'rgb(255,255,50)')
 {
   var geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments, 0, Math.PI * 2, 0, Math.PI);
-  var material = new THREE.MeshBasicMaterial({color:"rgb(255,255,50)"});
+  var material = new THREE.MeshBasicMaterial({color: color});
   var object = new THREE.Mesh(geometry, material);
     object.visible = true;
     object.position.copy(position);
