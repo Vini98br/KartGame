@@ -376,8 +376,6 @@ function main() {
       trackballControls.update();
     }
     requestAnimationFrame(render);
-    // lightFollowingCamera(spotLight, camera);
-    // spotLight.position.copy( camera.position );
     keyboardUpdate();
     moveWheel();
     setLowMountain(80, 30);
