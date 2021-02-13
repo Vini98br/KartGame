@@ -6,18 +6,12 @@ function main() {
   // Inicializar o renderizador
   var renderer = initRenderer();
 
-  var lightColor = "rgb(255,255,255)";
-
-  // Configurando iluminação direcional
-  var sunLight = new THREE.DirectionalLight(lightColor);
-  setDirectionalLighting(sunLight, scene, new THREE.Vector3(2, 3, 2.1));
-
   // Posição inicial do kart
   var kartInitialPosition = new THREE.Vector3(1.2, 0, 2);
   // Guarda posição do kart
   var saveKartPosition = new THREE.Vector3(1.2, 0, 2);
   // Guarda rotation do kart
-  var saveKartRotation = new THREE.Vector3(0,0,0);
+  var saveKartRotation = new THREE.Vector3(0, 0, 0);
   // Angulo inicial de rotação do kart
   var kartRotationAngle = 0;
   // Angulo inicial de rotação das rodas
@@ -60,16 +54,23 @@ function main() {
   camera.position.set(0, 10, 50);
   camera.up.set(0, 0, 1);
 
-  // Configurando iluminação de spot
-  var spotLight = new THREE.SpotLight(lightColor);
-  setSpotLight(spotLight, camera, new THREE.Vector3(0, 10, 15));
-  spotLight.position.set(0, 0, 1);
-  spotLight.target = camera;
-
   var trackballControls = new THREE.TrackballControls(
     camera,
     renderer.domElement
   );
+
+  // Cor da luz
+  var lightColor = "rgb(255,255,255)";
+
+  // Configurando iluminação direcional
+  var sunLight = new THREE.DirectionalLight(lightColor);
+  setDirectionalLighting(sunLight, scene, new THREE.Vector3(1, 3, 200));
+
+  // Configurando iluminação de spot
+  var spotLight = new THREE.SpotLight(lightColor);
+  setSpotLight(spotLight, camera, new THREE.Vector3(0, 10, 15));
+  spotLight.position.set(0, 0, 50);
+  spotLight.target = camera;
 
   // Plano
   var plane = GroundPlane();
@@ -118,34 +119,34 @@ function main() {
   var mountainColor = "rgb(100, 70, 20)";
   var objectMaterial = new THREE.MeshLambertMaterial({
     color: mountainColor,
-    opacity: 1});
+    opacity: 1,
+  });
 
-  // Mountanha baixa
+  // Montanha baixa
   function setLowMountain(centerPointX, centerPointY) {
     var points = [];
 
     //Objeto 1
     //Pontos da base
-    points.push(new THREE.Vector3(centerPointX+80, centerPointY+30,1.2));
-    points.push(new THREE.Vector3(centerPointX+40, centerPointY+30,1.2));
-    points.push(new THREE.Vector3(centerPointX-80, centerPointY-30,1.2));
-    points.push(new THREE.Vector3(centerPointX+60, centerPointY+30,1.2));
-    points.push(new THREE.Vector3(centerPointX-40, centerPointY-30,1.2));
+    points.push(new THREE.Vector3(centerPointX + 80, centerPointY + 30, 1.2));
+    points.push(new THREE.Vector3(centerPointX + 40, centerPointY + 30, 1.2));
+    points.push(new THREE.Vector3(centerPointX - 80, centerPointY - 30, 1.2));
+    points.push(new THREE.Vector3(centerPointX + 60, centerPointY + 30, 1.2));
+    points.push(new THREE.Vector3(centerPointX - 40, centerPointY - 30, 1.2));
 
     //Pontos intermediarios
-    points.push(new THREE.Vector3(centerPointX+40, centerPointY+30,25));
-    points.push(new THREE.Vector3(centerPointX+20, centerPointY+30,25));
-    points.push(new THREE.Vector3(centerPointX-40, centerPointY-30,25));
-    points.push(new THREE.Vector3(centerPointX+30, centerPointY+30,25));
-    points.push(new THREE.Vector3(centerPointX-20, centerPointY-30,25));
+    points.push(new THREE.Vector3(centerPointX + 40, centerPointY + 30, 25));
+    points.push(new THREE.Vector3(centerPointX + 20, centerPointY + 30, 25));
+    points.push(new THREE.Vector3(centerPointX - 40, centerPointY - 30, 25));
+    points.push(new THREE.Vector3(centerPointX + 30, centerPointY + 30, 25));
+    points.push(new THREE.Vector3(centerPointX - 20, centerPointY - 30, 25));
 
     // Pontos do pico
-    points.push(new THREE.Vector3(centerPointX+5, centerPointY+30,25));
-    points.push(new THREE.Vector3(centerPointX, centerPointY+30,25));
-    points.push(new THREE.Vector3(centerPointX-5, centerPointY-30,25));
-    points.push(new THREE.Vector3(centerPointX+2.5, centerPointY+30,25));
-    points.push(new THREE.Vector3(centerPointX, centerPointY-30,25));
-
+    points.push(new THREE.Vector3(centerPointX + 5, centerPointY + 30, 25));
+    points.push(new THREE.Vector3(centerPointX, centerPointY + 30, 25));
+    points.push(new THREE.Vector3(centerPointX - 5, centerPointY - 30, 25));
+    points.push(new THREE.Vector3(centerPointX + 2.5, centerPointY + 30, 25));
+    points.push(new THREE.Vector3(centerPointX, centerPointY - 30, 25));
 
     var convexGeometry = new THREE.ConvexBufferGeometry(points);
 
@@ -234,7 +235,11 @@ function main() {
 
   function returnKartPositionInGame() {
     kart.position.copy(saveKartPosition);
-    kart.rotation.set(saveKartRotation.x, saveKartRotation.y, saveKartRotation.z);
+    kart.rotation.set(
+      saveKartRotation.x,
+      saveKartRotation.y,
+      saveKartRotation.z
+    );
   }
 
   // Função que lida com movimentação das rodas
@@ -413,6 +418,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
 
   // Carenagem
   var mainCareen = Careen(DISTANCE_BETWEEN_WHEELS);
+  mainCareen.castShadow = true;
   mainAxle.add(mainCareen);
 
   render();
@@ -430,7 +436,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
 function GroundPlane() {
   const planeGeometry = new THREE.PlaneGeometry(700, 700, 40, 40);
   planeGeometry.translate(0.0, 0.0, -0.02);
-  const planeMaterial = new THREE.MeshBasicMaterial({
+  const planeMaterial = new THREE.MeshLambertMaterial({
     color: "rgba(20, 30, 110)",
     side: THREE.DoubleSide,
     polygonOffset: true,
@@ -438,6 +444,7 @@ function GroundPlane() {
     polygonOffsetUnits: 1,
   });
   const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  plane.receiveShadow = true;
   const wireframe = new THREE.WireframeGeometry(planeGeometry);
   const line = new THREE.LineSegments(wireframe);
   line.material.color.setStyle("rgb(180, 180, 180)");
@@ -553,6 +560,7 @@ function Axle(length) {
   // Roda esquerda
   const leftWheel = Wheel();
   leftWheel.rotateX(degreesToRadians(90)).translateZ(translation);
+
   axleBar.add(leftWheel);
 
   // Roda direita
@@ -572,6 +580,8 @@ function LightPole(position, lightColor) {
   const pointLight = new THREE.PointLight(lightColor);
 
   const pole = GenerateBar(10);
+  pole.castShadow = true;
+
   pole.rotateX(degreesToRadians(90));
   pole.position.copy(position);
 
@@ -606,7 +616,8 @@ function GenerateBar(length) {
 function GenerateSphere(radius, color) {
   const sphereGeometry = new THREE.SphereGeometry(radius, 32, 32);
   const sphereMaterial = new THREE.MeshPhongMaterial({ color: color });
-  return new THREE.Mesh(sphereGeometry, sphereMaterial);
+  const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  return sphere;
 }
 
 // Configuração da caixa de mensagem
