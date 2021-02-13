@@ -14,6 +14,10 @@ function main() {
 
   // Posição inicial do kart
   var kartInitialPosition = new THREE.Vector3(1.2, 0, 2);
+  // Guarda posição do kart
+  var saveKartPosition = new THREE.Vector3(1.2, 0, 2);
+  // Guarda rotation do kart
+  var saveKartRotation = new THREE.Vector3(0,0,0);
   // Angulo inicial de rotação do kart
   var kartRotationAngle = 0;
   // Angulo inicial de rotação das rodas
@@ -110,6 +114,45 @@ function main() {
   // Fazendo a camera "olhar" para o eixo traseiro do kart
   camera.lookAt(kart.rearAxle.position);
 
+  // Montanhas
+  var mountainColor = "rgb(100, 70, 20)";
+  var objectMaterial = new THREE.MeshLambertMaterial({
+    color: mountainColor,
+    opacity: 1});
+
+  // Mountanha baixa
+  function setLowMountain(centerPointX, centerPointY) {
+    var points = [];
+
+    //Objeto 1
+    //Pontos da base
+    points.push(new THREE.Vector3(centerPointX+80, centerPointY+30,1.2));
+    points.push(new THREE.Vector3(centerPointX+40, centerPointY+30,1.2));
+    points.push(new THREE.Vector3(centerPointX-80, centerPointY-30,1.2));
+    points.push(new THREE.Vector3(centerPointX+60, centerPointY+30,1.2));
+    points.push(new THREE.Vector3(centerPointX-40, centerPointY-30,1.2));
+
+    //Pontos intermediarios
+    points.push(new THREE.Vector3(centerPointX+40, centerPointY+30,25));
+    points.push(new THREE.Vector3(centerPointX+20, centerPointY+30,25));
+    points.push(new THREE.Vector3(centerPointX-40, centerPointY-30,25));
+    points.push(new THREE.Vector3(centerPointX+30, centerPointY+30,25));
+    points.push(new THREE.Vector3(centerPointX-20, centerPointY-30,25));
+
+    // Pontos do pico
+    points.push(new THREE.Vector3(centerPointX+5, centerPointY+30,25));
+    points.push(new THREE.Vector3(centerPointX, centerPointY+30,25));
+    points.push(new THREE.Vector3(centerPointX-5, centerPointY-30,25));
+    points.push(new THREE.Vector3(centerPointX+2.5, centerPointY+30,25));
+    points.push(new THREE.Vector3(centerPointX, centerPointY-30,25));
+
+
+    var convexGeometry = new THREE.ConvexBufferGeometry(points);
+
+    var lowObject = new THREE.Mesh(convexGeometry, objectMaterial);
+    scene.add(lowObject);
+  }
+
   // Ouvindo mudanças no tamanho da tela
   window.addEventListener(
     "resize",
@@ -129,8 +172,8 @@ function main() {
       return;
     }
     gameModeCamera = !gameModeCamera;
-    resetKart();
     if (gameModeCamera) {
+      returnKartPositionInGame();
       message("game-mode");
       showElement(gameModeControls.infoBox);
       hideElement(inspectionModeControls.infoBox);
@@ -140,6 +183,9 @@ function main() {
       trackballControls.enabled = false;
       moveGameCamera();
     } else {
+      saveKartPosition.copy(kart.position);
+      saveKartRotation.copy(kart.rotation);
+      resetKart();
       message("inspection-mode");
       showElement(inspectionModeControls.infoBox);
       hideElement(gameModeControls.infoBox);
@@ -170,14 +216,13 @@ function main() {
 
   // Função que lida com movimentação da camera no modo Inspeção
   function moveInspectionCamera() {
-    var distanceX = 8;
-    var distanceY = -80;
-    var distanceZ = 40;
+    var distanceX = 5;
+    var distanceY = -10;
+    var distanceZ = 10;
     camera.position.x = kartInitialPosition.x - distanceX;
     camera.position.y = kartInitialPosition.y - distanceY;
     camera.position.z = kartInitialPosition.z + distanceZ;
     camera.lookAt(kart.position);
-    camera.up.set(0, 0, 1);
   }
 
   // Resetar kart para posição, rotação e velocidade inicial
@@ -185,6 +230,11 @@ function main() {
     kart.position.copy(kartInitialPosition);
     kart.rotation.set(degreesToRadians(90), 0, degreesToRadians(90));
     speed = 0;
+  }
+
+  function returnKartPositionInGame() {
+    kart.position.copy(saveKartPosition);
+    kart.rotation.set(saveKartRotation.x, saveKartRotation.y, saveKartRotation.z);
   }
 
   // Função que lida com movimentação das rodas
@@ -325,6 +375,7 @@ function main() {
     // spotLight.position.copy( camera.position );
     keyboardUpdate();
     moveWheel();
+    setLowMountain(80, 30);
     if (gameModeCamera) moveGameCamera();
 
     if ((upUp || downUp) && speed > 0) {
