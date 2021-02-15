@@ -7,7 +7,9 @@ function main() {
   var renderer = initRenderer();
 
   // Posição inicial do kart
-  var kartInitialPosition = new THREE.Vector3(1.2, 0, 2);
+  var kartInitialPosition = new THREE.Vector3(0, -275, 1.2);
+  // Posição do kart no centro
+  var centerKartPosition = new THREE.Vector3(0, 0, 1.2);
   // Guarda posição do kart
   var saveKartPosition = new THREE.Vector3(1.2, 0, 2);
   // Guarda rotation do kart
@@ -122,6 +124,12 @@ function main() {
     opacity: 1,
   });
 
+  var moutainLowObject1 = null;
+  var moutainLowObject2 = null;
+  var mountainHighObject1 = null;
+  var mountainHighObject2 = null;
+  var mountainHighObject3 = null;
+
   setLowMountain(180, 170);
   setHighMountain(-120, 20);
 
@@ -158,7 +166,8 @@ function main() {
 
     var convexGeometryObject1 = new THREE.ConvexBufferGeometry(pointsObject1);
     var smallMountainObject1 = new THREE.Mesh(convexGeometryObject1, objectMaterial);
-    scene.add(smallMountainObject1);
+    moutainLowObject1 = smallMountainObject1;
+    scene.add(moutainLowObject1);
 
     //Objeto 2
     var pointsObject2 = [];
@@ -191,7 +200,8 @@ function main() {
 
     var convexGeometryObject2 = new THREE.ConvexBufferGeometry(pointsObject2);
     var smallMountainObject2 = new THREE.Mesh(convexGeometryObject2, objectMaterial);
-    scene.add(smallMountainObject2);
+    moutainLowObject2 = smallMountainObject2;
+    scene.add(moutainLowObject2);
   }
   
   function setHighMountain(centerPointX, centerPointY) {
@@ -226,7 +236,8 @@ function main() {
 
     var convexGeometryObject1 = new THREE.ConvexBufferGeometry(pointsObject1);
     var highMountainObject1 = new THREE.Mesh(convexGeometryObject1, objectMaterial);
-    scene.add(highMountainObject1);
+    mountainHighObject1 = highMountainObject1;
+    scene.add(mountainHighObject1);
 
     //Objeto 2
     var pointsObject2 = [];
@@ -259,7 +270,8 @@ function main() {
 
     var convexGeometryObject2 = new THREE.ConvexBufferGeometry(pointsObject2);
     var highMountainObject2 = new THREE.Mesh(convexGeometryObject2, objectMaterial);
-    scene.add(highMountainObject2);
+    mountainHighObject2 = highMountainObject2;
+    scene.add(mountainHighObject2);
 
     //Objeto 3
     var pointsObject3 = [];
@@ -292,11 +304,13 @@ function main() {
 
     var convexGeometryObject3 = new THREE.ConvexBufferGeometry(pointsObject3);
     var highMountainObject3 = new THREE.Mesh(convexGeometryObject3, objectMaterial);
-    scene.add(highMountainObject3);
+    mountainHighObject3 = highMountainObject3;
+    scene.add(mountainHighObject3);
   }
 
   //Estatua
   loadOBJFile('../assets/', 'sm_statue_lion_lod0', true, 40, -230, 200);
+  var statue = null;
 
   function loadOBJFile(modelPath, modelName, visibility, desiredScale, positionX, positionY)
   {
@@ -328,8 +342,8 @@ function main() {
 
            var obj = normalizeAndRescaleStatue(obj, desiredScale);
            var obj = fixStatuePosition(obj, positionX, positionY, 360, 90);
-
-           scene.add ( obj );
+           statue = obj;
+           scene.add ( statue );
 
          }, onProgress, onError );
     });
@@ -387,9 +401,10 @@ function main() {
       message("game-mode");
       showElement(gameModeControls.infoBox);
       hideElement(inspectionModeControls.infoBox);
+      
+      // Adiciona na cena
+      addIntoScene();
 
-      scene.add(plane);
-      scene.add(plane.line);
       trackballControls.enabled = false;
       moveGameCamera();
     } else {
@@ -400,8 +415,9 @@ function main() {
       showElement(inspectionModeControls.infoBox);
       hideElement(gameModeControls.infoBox);
 
-      scene.remove(plane);
-      scene.remove(plane.line);
+      // Removes da cena
+      removeFromScene();
+
       trackballControls.enabled = true;
       moveInspectionCamera();
     }
@@ -429,15 +445,15 @@ function main() {
     var distanceX = 5;
     var distanceY = -10;
     var distanceZ = 10;
-    camera.position.x = kartInitialPosition.x - distanceX;
-    camera.position.y = kartInitialPosition.y - distanceY;
-    camera.position.z = kartInitialPosition.z + distanceZ;
+    camera.position.x = centerKartPosition.x - distanceX;
+    camera.position.y = centerKartPosition.y - distanceY;
+    camera.position.z = centerKartPosition.z + distanceZ;
     camera.lookAt(kart.position);
   }
 
   // Resetar kart para posição, rotação e velocidade inicial
   function resetKart() {
-    kart.position.copy(kartInitialPosition);
+    kart.position.copy(centerKartPosition);
     kart.rotation.set(degreesToRadians(90), 0, degreesToRadians(90));
     speed = 0;
   }
@@ -449,6 +465,44 @@ function main() {
       saveKartRotation.y,
       saveKartRotation.z
     );
+  }
+
+  function addIntoScene() {
+    scene.add(plane);
+    scene.add(plane.line);
+    scene.add(moutainLowObject2);
+    scene.add(moutainLowObject1);
+    scene.add(mountainHighObject1);
+    scene.add(mountainHighObject2);
+    scene.add(mountainHighObject3);
+    scene.add(pole1);
+    scene.add(pole2);
+    scene.add(pole3);
+    scene.add(pole4);
+    scene.add(pole5);
+    scene.add(pole6);
+    scene.add(pole7);
+    scene.add(pole8);
+    scene.add(statue);
+  }
+
+  function removeFromScene(){
+    scene.remove(plane);
+    scene.remove(plane.line);
+    scene.remove(moutainLowObject2);
+    scene.remove(moutainLowObject1);
+    scene.remove(mountainHighObject1);
+    scene.remove(mountainHighObject2);
+    scene.remove(mountainHighObject3);
+    scene.remove(pole1);
+    scene.remove(pole2);
+    scene.remove(pole3);
+    scene.remove(pole4);
+    scene.remove(pole5);
+    scene.remove(pole6);
+    scene.remove(pole7);
+    scene.remove(pole8);
+    scene.remove(statue);
   }
 
   // Função que lida com movimentação das rodas
@@ -601,7 +655,7 @@ function main() {
 }
 
 // Componente Kart
-function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
+function Kart(initialPosition = new THREE.Vector3(0, -200, 1.2)) {
   var DISTANCE_BETWEEN_WHEELS = 6;
   var DISTANCE_BETWEEN_AXLES = 6;
 
@@ -634,7 +688,7 @@ function Kart(initialPosition = new THREE.Vector3(0, 0, 1.2)) {
     mainAxle.frontAxle = frontAxle;
     mainAxle.rearAxle = rearAxle;
   }
-  return mainAxle;
+  return mainAxle.rotateX(degreesToRadians(180));
 }
 
 //*========================== Componentes do Kart ==========================*
