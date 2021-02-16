@@ -124,258 +124,37 @@ function main() {
     opacity: 1,
   });
 
-  var moutainLowObject1 = null;
-  var moutainLowObject2 = null;
-  var mountainHighObject1 = null;
-  var mountainHighObject2 = null;
-  var mountainHighObject3 = null;
+  // Configurando montanha baixa
+  var { mountainLowObject1, mountainLowObject2 } = setLowMountain(
+    180,
+    170,
+    objectMaterial
+  );
+  scene.add(mountainLowObject1);
+  scene.add(mountainLowObject2);
 
-  setLowMountain(180, 170);
-  setHighMountain(-120, 20);
-
-  // Montanha baixa
-  function setLowMountain(centerPointX, centerPointY) {
-    //Objeto 1
-    var pointsObject1 = [];
-
-    //Pontos da base
-    pointsObject1.push(new THREE.Vector3(centerPointX + 80, centerPointY + 30, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 120, centerPointY + 10, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX - 20, centerPointY - 30, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 165, centerPointY - 30, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 5, centerPointY + 30, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 5, centerPointY - 80, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 120, centerPointY - 80, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 80, centerPointY - 100, 0));
-
-    //Pontos intermediarios
-    pointsObject1.push(new THREE.Vector3(centerPointX + 130, centerPointY - 30, 40));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 90, centerPointY - 70, 40));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 30, centerPointY - 60, 40));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 10, centerPointY - 30, 40));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 45, centerPointY - 10, 40));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 90, centerPointY - 15, 40));
-
-    // Pontos do pico
-    pointsObject1.push(new THREE.Vector3(centerPointX + 20 , centerPointY - 40, 70));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 30, centerPointY - 60, 70));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 75, centerPointY - 50, 70));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 72, centerPointY - 30, 70));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 45, centerPointY - 30, 90));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 55, centerPointY - 48, 100));
-
-    var convexGeometryObject1 = new THREE.ConvexBufferGeometry(pointsObject1);
-    var smallMountainObject1 = new THREE.Mesh(convexGeometryObject1, objectMaterial);
-    moutainLowObject1 = smallMountainObject1;
-    scene.add(moutainLowObject1);
-
-    //Objeto 2
-    var pointsObject2 = [];
-
-    //Pontos da base
-    pointsObject2.push(new THREE.Vector3(centerPointX + 80, centerPointY - 100, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 5, centerPointY - 80, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 120, centerPointY - 80, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 80, centerPointY - 155, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 125, centerPointY - 115, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 132, centerPointY - 95, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 25, centerPointY - 120, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 48, centerPointY - 143, 0));
-
-    //Pontos intermediarios
-    pointsObject2.push(new THREE.Vector3(centerPointX + 25, centerPointY - 75, 28));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 90, centerPointY - 75, 28));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 95, centerPointY - 120, 28));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 75, centerPointY - 130, 28));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 45, centerPointY - 115, 28));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 103, centerPointY - 85, 28));
-
-    // Pontos do pico
-    pointsObject2.push(new THREE.Vector3(centerPointX + 55 , centerPointY - 110, 55));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 42, centerPointY - 100, 55));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 49, centerPointY - 90, 55));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 62, centerPointY - 103, 55));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 58, centerPointY - 94, 55));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 52, centerPointY - 97, 58));
-
-    var convexGeometryObject2 = new THREE.ConvexBufferGeometry(pointsObject2);
-    var smallMountainObject2 = new THREE.Mesh(convexGeometryObject2, objectMaterial);
-    moutainLowObject2 = smallMountainObject2;
-    scene.add(moutainLowObject2);
-  }
-  
-  function setHighMountain(centerPointX, centerPointY) {
-    //Objeto 1
-    var pointsObject1 = [];
-
-    //Pontos da base
-    pointsObject1.push(new THREE.Vector3(centerPointX + 130, centerPointY + 60, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 170, centerPointY + 40, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX - 80, centerPointY - 70, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 215, centerPointY - 70, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 55, centerPointY + 70, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 55, centerPointY - 110, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 170, centerPointY - 110, 0));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 130, centerPointY - 130, 0));
-
-    //Pontos intermediarios
-    pointsObject1.push(new THREE.Vector3(centerPointX + 170, centerPointY - 60, 100));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 120, centerPointY - 100, 100));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 60, centerPointY - 90, 100));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 40, centerPointY - 60, 100));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 75, centerPointY - 40, 100));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 120, centerPointY - 45, 100));
-
-    // Pontos do pico
-    pointsObject1.push(new THREE.Vector3(centerPointX + 50 , centerPointY - 40, 140));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 80, centerPointY - 60, 140));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 105, centerPointY - 50, 140));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 102, centerPointY - 30, 140));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 75, centerPointY - 30, 160));
-    pointsObject1.push(new THREE.Vector3(centerPointX + 85, centerPointY - 48, 170));
-
-    var convexGeometryObject1 = new THREE.ConvexBufferGeometry(pointsObject1);
-    var highMountainObject1 = new THREE.Mesh(convexGeometryObject1, objectMaterial);
-    mountainHighObject1 = highMountainObject1;
-    scene.add(mountainHighObject1);
-
-    //Objeto 2
-    var pointsObject2 = [];
-
-    //Pontos da base
-    pointsObject2.push(new THREE.Vector3(centerPointX + 120, centerPointY - 130, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 45, centerPointY - 110, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 160, centerPointY - 110, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 120, centerPointY - 215, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 195, centerPointY - 145, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 202, centerPointY - 80, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 65, centerPointY - 150, 0));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 88, centerPointY - 203, 0));
-
-    //Pontos intermediarios
-    pointsObject2.push(new THREE.Vector3(centerPointX + 65, centerPointY - 80, 78));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 130, centerPointY - 80, 78));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 135, centerPointY - 150, 78));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 115, centerPointY - 160, 78));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 85, centerPointY - 145, 78));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 143, centerPointY - 115, 78));
-
-    // Pontos do pico
-    pointsObject2.push(new THREE.Vector3(centerPointX + 85 , centerPointY - 140, 105));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 72, centerPointY - 130, 105));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 79, centerPointY - 120, 105));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 92, centerPointY - 133, 105));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 88, centerPointY - 124, 105));
-    pointsObject2.push(new THREE.Vector3(centerPointX + 82, centerPointY - 127, 108));
-
-    var convexGeometryObject2 = new THREE.ConvexBufferGeometry(pointsObject2);
-    var highMountainObject2 = new THREE.Mesh(convexGeometryObject2, objectMaterial);
-    mountainHighObject2 = highMountainObject2;
-    scene.add(mountainHighObject2);
-
-    //Objeto 3
-    var pointsObject3 = [];
-
-    //Pontos da base
-    pointsObject3.push(new THREE.Vector3(centerPointX + 50, centerPointY - 110, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX - 20, centerPointY - 110, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX, centerPointY - 140, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 70, centerPointY - 160, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 195, centerPointY - 145, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX - 10, centerPointY - 100, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 10, centerPointY - 80, 0));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 20, centerPointY - 65, 0));
-
-    //Pontos intermediarios
-    pointsObject3.push(new THREE.Vector3(centerPointX + 40, centerPointY - 70, 35));
-    pointsObject3.push(new THREE.Vector3(centerPointX - 10, centerPointY - 70, 35));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 125, centerPointY - 140, 35));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 105, centerPointY - 150, 35));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 75, centerPointY - 135, 35));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 133, centerPointY - 105, 35));
-
-    // Pontos do pico
-    pointsObject3.push(new THREE.Vector3(centerPointX + 25 , centerPointY - 50, 50));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 10, centerPointY - 50, 50));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 105, centerPointY - 120, 50));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 85, centerPointY - 130, 50));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 55, centerPointY - 115, 55));
-    pointsObject3.push(new THREE.Vector3(centerPointX + 113, centerPointY - 85, 60));
-
-    var convexGeometryObject3 = new THREE.ConvexBufferGeometry(pointsObject3);
-    var highMountainObject3 = new THREE.Mesh(convexGeometryObject3, objectMaterial);
-    mountainHighObject3 = highMountainObject3;
-    scene.add(mountainHighObject3);
-  }
+  // Configurando montanha alta
+  var {
+    mountainHighObject1,
+    mountainHighObject2,
+    mountainHighObject3,
+  } = setHighMountain(-120, 20, objectMaterial);
+  scene.add(mountainHighObject1);
+  scene.add(mountainHighObject2);
+  scene.add(mountainHighObject3);
 
   //Estatua
-  loadOBJFile('../assets/', 'sm_statue_lion_lod0', true, 40, -230, 200);
   var statue = null;
-
-  function loadOBJFile(modelPath, modelName, visibility, desiredScale, positionX, positionY)
-  {
-    currentModel = modelName;
-
-    var manager = new THREE.LoadingManager( );
-
-    var mtlLoader = new THREE.MTLLoader( manager );
-    mtlLoader.setPath( modelPath );
-    mtlLoader.load( modelName + '.mtl', function ( materials ) {
-         materials.preload();
-
-         var objLoader = new THREE.OBJLoader( manager );
-         objLoader.setMaterials(materials);
-         objLoader.setPath(modelPath);
-         objLoader.load( modelName + ".obj", function ( obj ) {
-           obj.name = modelName;
-           obj.visible = visibility;
-           // Set 'castShadow' property for each children of the group
-           obj.traverse( function (child)
-           {
-             child.castShadow = false;
-           });
-
-           obj.traverse( function( node )
-           {
-             if( node.material ) node.material.side = THREE.DoubleSide;
-           });
-
-           var obj = normalizeAndRescaleStatue(obj, desiredScale);
-           var obj = fixStatuePosition(obj, positionX, positionY, 360, 90);
-           statue = obj;
-           scene.add ( statue );
-
-         }, onProgress, onError );
-    });
-  }
-
-  function onError() { };
-
-  function onProgress ( xhr, model ) {
-     if ( xhr.lengthComputable ) {
-       var percentComplete = xhr.loaded / xhr.total * 100;
-     }
-  }
-
-  function normalizeAndRescaleStatue(obj, newScale)
-  {
-    var scale = getMaxSize(obj); // Available in 'utils.js'
-    obj.scale.set(newScale * (1.0/scale),
-                  newScale * (1.0/scale),
-                  newScale * (1.0/scale));
-    return obj;
-  }
-
-  function fixStatuePosition(obj, positionX, positionY, rotationZ, rotationX)
-  {
-   // Fix position of the object over the ground plane
-    var box = new THREE.Box3().setFromObject( obj );
-    obj.position.x = positionX;
-    obj.position.y = positionY;
-    obj.rotateZ(degreesToRadians(rotationZ));
-    obj.rotateX(degreesToRadians(rotationX));
-    return obj;
-  }
+  loadOBJFile(
+    statue,
+    scene,
+    "../assets/",
+    "sm_statue_lion_lod0",
+    true,
+    40,
+    -230,
+    200
+  );
 
   // Ouvindo mudanças no tamanho da tela
   window.addEventListener(
@@ -401,7 +180,7 @@ function main() {
       message("game-mode");
       showElement(gameModeControls.infoBox);
       hideElement(inspectionModeControls.infoBox);
-      
+
       // Adiciona na cena
       addIntoScene();
 
@@ -458,6 +237,7 @@ function main() {
     speed = 0;
   }
 
+  // Função que retorna a posição do Kart no modo de jogo
   function returnKartPositionInGame() {
     kart.position.copy(saveKartPosition);
     kart.rotation.set(
@@ -467,11 +247,12 @@ function main() {
     );
   }
 
+  // Adiciona elementos na cena
   function addIntoScene() {
     scene.add(plane);
     scene.add(plane.line);
-    scene.add(moutainLowObject2);
-    scene.add(moutainLowObject1);
+    scene.add(mountainLowObject2);
+    scene.add(mountainLowObject1);
     scene.add(mountainHighObject1);
     scene.add(mountainHighObject2);
     scene.add(mountainHighObject3);
@@ -486,11 +267,12 @@ function main() {
     scene.add(statue);
   }
 
-  function removeFromScene(){
+  // Remove elementos da cena
+  function removeFromScene() {
     scene.remove(plane);
     scene.remove(plane.line);
-    scene.remove(moutainLowObject2);
-    scene.remove(moutainLowObject1);
+    scene.remove(mountainLowObject2);
+    scene.remove(mountainLowObject1);
     scene.remove(mountainHighObject1);
     scene.remove(mountainHighObject2);
     scene.remove(mountainHighObject3);
@@ -580,8 +362,8 @@ function main() {
     if (keyboard.down("space")) changeCameraMode();
   }
 
+  // Constrói a interface (instruções, luzes, velocímetro)
   function buildInterface() {
-    //------------------------------------------------------------
     // Interface
     var controls = new (function () {
       this.sunLight = true;
@@ -696,7 +478,7 @@ function Kart(initialPosition = new THREE.Vector3(0, -200, 1.2)) {
 function GroundPlane() {
   const planeGeometry = new THREE.PlaneGeometry(700, 700, 40, 40);
   planeGeometry.translate(0.0, 0.0, -0.02);
-  const planeMaterial = new THREE.MeshLambertMaterial({
+  const planeMaterial = new THREE.MeshPhongMaterial({
     color: "rgba(20, 30, 110)",
     side: THREE.DoubleSide,
     polygonOffset: true,
@@ -796,6 +578,7 @@ function Wheel() {
     color: "black",
   });
   const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+  wheel.castShadow = true;
   return wheel;
 }
 
@@ -836,21 +619,390 @@ function Axle(length) {
 }
 
 //*========================== Componentes do Mundo ==========================*
+// Poste de iluminação
 function LightPole(position, lightColor) {
   const pointLight = new THREE.PointLight(lightColor);
 
-  const pole = GenerateBar(10);
+  const pole = GenerateBar(15);
   pole.castShadow = true;
 
   pole.rotateX(degreesToRadians(90));
   pole.position.copy(position);
 
-  const light = GenerateSphere(0.3, "yellow");
+  const light = GenerateSphere(1, "yellow");
   pole.add(light);
-  light.translateY(5);
+  light.translateY(8);
 
   pole.light = setPointLight(pointLight, position);
   return pole;
+}
+
+// Montanha baixa
+function setLowMountain(centerPointX, centerPointY, material) {
+  //Objeto 1
+  var pointsObject1 = [];
+
+  //Pontos da base
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 80, centerPointY + 30, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY + 10, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX - 20, centerPointY - 30, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 165, centerPointY - 30, 0)
+  );
+  pointsObject1.push(new THREE.Vector3(centerPointX + 5, centerPointY + 30, 0));
+  pointsObject1.push(new THREE.Vector3(centerPointX + 5, centerPointY - 80, 0));
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY - 80, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 80, centerPointY - 100, 0)
+  );
+
+  //Pontos intermediarios
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 130, centerPointY - 30, 40)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 90, centerPointY - 70, 40)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 30, centerPointY - 60, 40)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 10, centerPointY - 30, 40)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 45, centerPointY - 10, 40)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 90, centerPointY - 15, 40)
+  );
+
+  // Pontos do pico
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 20, centerPointY - 40, 70)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 30, centerPointY - 60, 70)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 75, centerPointY - 50, 70)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 72, centerPointY - 30, 70)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 45, centerPointY - 30, 90)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 55, centerPointY - 48, 100)
+  );
+
+  var convexGeometryObject1 = new THREE.ConvexBufferGeometry(pointsObject1);
+  var smallMountainObject1 = new THREE.Mesh(convexGeometryObject1, material);
+
+  //Objeto 2
+  var pointsObject2 = [];
+
+  //Pontos da base
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 80, centerPointY - 100, 0)
+  );
+  pointsObject2.push(new THREE.Vector3(centerPointX + 5, centerPointY - 80, 0));
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY - 80, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 80, centerPointY - 155, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 125, centerPointY - 115, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 132, centerPointY - 95, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 25, centerPointY - 120, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 48, centerPointY - 143, 0)
+  );
+
+  //Pontos intermediarios
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 25, centerPointY - 75, 28)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 90, centerPointY - 75, 28)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 95, centerPointY - 120, 28)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 75, centerPointY - 130, 28)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 45, centerPointY - 115, 28)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 103, centerPointY - 85, 28)
+  );
+
+  // Pontos do pico
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 55, centerPointY - 110, 55)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 42, centerPointY - 100, 55)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 49, centerPointY - 90, 55)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 62, centerPointY - 103, 55)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 58, centerPointY - 94, 55)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 52, centerPointY - 97, 58)
+  );
+
+  var convexGeometryObject2 = new THREE.ConvexBufferGeometry(pointsObject2);
+  var smallMountainObject2 = new THREE.Mesh(convexGeometryObject2, material);
+  return {
+    mountainLowObject1: smallMountainObject1,
+    mountainLowObject2: smallMountainObject2,
+  };
+}
+
+// Montanha alta
+function setHighMountain(centerPointX, centerPointY, material) {
+  //Objeto 1
+  var pointsObject1 = [];
+
+  //Pontos da base
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 130, centerPointY + 60, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 170, centerPointY + 40, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX - 80, centerPointY - 70, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 215, centerPointY - 70, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 55, centerPointY + 70, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 55, centerPointY - 110, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 170, centerPointY - 110, 0)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 130, centerPointY - 130, 0)
+  );
+
+  //Pontos intermediarios
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 170, centerPointY - 60, 100)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY - 100, 100)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 60, centerPointY - 90, 100)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 40, centerPointY - 60, 100)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 75, centerPointY - 40, 100)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY - 45, 100)
+  );
+
+  // Pontos do pico
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 50, centerPointY - 40, 140)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 80, centerPointY - 60, 140)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 105, centerPointY - 50, 140)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 102, centerPointY - 30, 140)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 75, centerPointY - 30, 160)
+  );
+  pointsObject1.push(
+    new THREE.Vector3(centerPointX + 85, centerPointY - 48, 170)
+  );
+
+  var convexGeometryObject1 = new THREE.ConvexBufferGeometry(pointsObject1);
+  var highMountainObject1 = new THREE.Mesh(convexGeometryObject1, material);
+
+  //Objeto 2
+  var pointsObject2 = [];
+
+  //Pontos da base
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY - 130, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 45, centerPointY - 110, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 160, centerPointY - 110, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 120, centerPointY - 215, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 195, centerPointY - 145, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 202, centerPointY - 80, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 65, centerPointY - 150, 0)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 88, centerPointY - 203, 0)
+  );
+
+  //Pontos intermediarios
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 65, centerPointY - 80, 78)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 130, centerPointY - 80, 78)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 135, centerPointY - 150, 78)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 115, centerPointY - 160, 78)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 85, centerPointY - 145, 78)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 143, centerPointY - 115, 78)
+  );
+
+  // Pontos do pico
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 85, centerPointY - 140, 105)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 72, centerPointY - 130, 105)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 79, centerPointY - 120, 105)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 92, centerPointY - 133, 105)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 88, centerPointY - 124, 105)
+  );
+  pointsObject2.push(
+    new THREE.Vector3(centerPointX + 82, centerPointY - 127, 108)
+  );
+
+  var convexGeometryObject2 = new THREE.ConvexBufferGeometry(pointsObject2);
+  var highMountainObject2 = new THREE.Mesh(convexGeometryObject2, material);
+
+  //Objeto 3
+  var pointsObject3 = [];
+
+  //Pontos da base
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 50, centerPointY - 110, 0)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX - 20, centerPointY - 110, 0)
+  );
+  pointsObject3.push(new THREE.Vector3(centerPointX, centerPointY - 140, 0));
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 70, centerPointY - 160, 0)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 195, centerPointY - 145, 0)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX - 10, centerPointY - 100, 0)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 10, centerPointY - 80, 0)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 20, centerPointY - 65, 0)
+  );
+
+  //Pontos intermediarios
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 40, centerPointY - 70, 35)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX - 10, centerPointY - 70, 35)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 125, centerPointY - 140, 35)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 105, centerPointY - 150, 35)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 75, centerPointY - 135, 35)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 133, centerPointY - 105, 35)
+  );
+
+  // Pontos do pico
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 25, centerPointY - 50, 50)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 10, centerPointY - 50, 50)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 105, centerPointY - 120, 50)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 85, centerPointY - 130, 50)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 55, centerPointY - 115, 55)
+  );
+  pointsObject3.push(
+    new THREE.Vector3(centerPointX + 113, centerPointY - 85, 60)
+  );
+
+  var convexGeometryObject3 = new THREE.ConvexBufferGeometry(pointsObject3);
+  var highMountainObject3 = new THREE.Mesh(convexGeometryObject3, material);
+
+  return {
+    mountainHighObject1: highMountainObject1,
+    mountainHighObject2: highMountainObject2,
+    mountainHighObject3: highMountainObject3,
+  };
 }
 
 //*========================== Funções auxiliares ==========================*
@@ -919,6 +1071,7 @@ function message(elm) {
   }, 1000);
 }
 
+// Configura luz direcional
 function setDirectionalLighting(light, scene, position) {
   light.position.copy(position);
   light.shadow.mapSize.width = 2048;
@@ -935,6 +1088,7 @@ function setDirectionalLighting(light, scene, position) {
   scene.add(light);
 }
 
+// Configura luz de spot
 function setSpotLight(light, scene, position) {
   light.position.copy(position);
   light.shadow.mapSize.width = 2048;
@@ -949,6 +1103,7 @@ function setSpotLight(light, scene, position) {
   scene.add(light);
 }
 
+// Configura luz pontual
 function setPointLight(light, position) {
   light.position.copy(position);
   light.name = "Point Light";
@@ -956,4 +1111,87 @@ function setPointLight(light, position) {
   light.visible = true;
 
   return light;
+}
+
+function addArrayToScene(scene, objects) {
+  objects.forEach((obj) => {
+    scene.add(obj);
+  });
+}
+
+// Fixa o objeto sobre o plano do chão
+function fixStatuePosition(obj, positionX, positionY, rotationZ, rotationX) {
+  var box = new THREE.Box3().setFromObject(obj);
+  obj.position.x = positionX;
+  obj.position.y = positionY;
+  obj.rotateZ(degreesToRadians(rotationZ));
+  obj.rotateX(degreesToRadians(rotationX));
+  return obj;
+}
+
+// Manipulando estátua
+function normalizeAndRescaleStatue(obj, newScale) {
+  var scale = getMaxSize(obj); // Available in 'utils.js'
+  obj.scale.set(
+    newScale * (1.0 / scale),
+    newScale * (1.0 / scale),
+    newScale * (1.0 / scale)
+  );
+  return obj;
+}
+
+// Carregando arquivo externo
+function loadOBJFile(
+  object,
+  scene,
+  modelPath,
+  modelName,
+  visibility,
+  desiredScale,
+  positionX,
+  positionY
+) {
+  currentModel = modelName;
+
+  var manager = new THREE.LoadingManager();
+
+  var mtlLoader = new THREE.MTLLoader(manager);
+  mtlLoader.setPath(modelPath);
+  mtlLoader.load(modelName + ".mtl", function (materials) {
+    materials.preload();
+
+    var objLoader = new THREE.OBJLoader(manager);
+    objLoader.setMaterials(materials);
+    objLoader.setPath(modelPath);
+    objLoader.load(
+      modelName + ".obj",
+      function (obj) {
+        obj.name = modelName;
+        obj.visible = visibility;
+        // Set 'castShadow' property for each children of the group
+        obj.traverse(function (child) {
+          child.castShadow = false;
+        });
+
+        obj.traverse(function (node) {
+          if (node.material) node.material.side = THREE.DoubleSide;
+        });
+
+        var obj = normalizeAndRescaleStatue(obj, desiredScale);
+        var obj = fixStatuePosition(obj, positionX, positionY, 360, 90);
+        object = obj;
+        scene.add(obj);
+      },
+      onProgress,
+      onError
+    );
+  });
+}
+
+function onError() {}
+
+function onProgress(xhr, model) {
+  if (xhr.lengthComputable) {
+    var percentComplete = (xhr.loaded / xhr.total) * 100;
+  }
 }
