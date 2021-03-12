@@ -7,7 +7,7 @@ function main() {
   var renderer = initRenderer();
 
   // Posição inicial do kart
-  var kartInitialPosition = new THREE.Vector3(0, -275, 1.2);
+  var kartInitialPosition = new THREE.Vector3(0, -425, 1.2);
   // Posição do kart no centro
   var centerKartPosition = new THREE.Vector3(0, 0, 1.2);
   // Guarda posição do kart
@@ -15,7 +15,7 @@ function main() {
   // Guarda rotation do kart
   var saveKartRotation = new THREE.Vector3(0, 0, 0);
   // Angulo inicial de rotação do kart
-  var kartRotationAngle = 0;
+  var kartRotationAngle = 10;
   // Angulo inicial de rotação das rodas
   var wheelRotationAngle = 90;
   // Velocidade máxima
@@ -47,10 +47,10 @@ function main() {
 
   // Configurando câmera
   var camera = new THREE.PerspectiveCamera(
-    60,
+    90,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    10000
   );
   scene.add(camera);
   camera.position.set(0, 10, 50);
@@ -74,42 +74,59 @@ function main() {
   spotLight.position.set(0, 0, 50);
   spotLight.target = camera;
 
-  // Plano
+  // Plano Principal
   var plane = GroundPlane();
   scene.add(plane);
-  scene.add(plane.line);
+  var textureLoader = new THREE.TextureLoader();
+  var track = textureLoader.load('./assets/pista.jpg');
+  setTexture(plane, track, 1, 1);
 
-  var pole1 = LightPole(new THREE.Vector3(150, -300, 6.5), lightColor);
+  // Plano Secundário
+  var secondaryPlane = SecondaryPlane();
+  secondaryPlane.translateZ(-0.1);
+  scene.add(secondaryPlane);
+  var sand = textureLoader.load('./assets/sand.jpg');
+  setTexture(secondaryPlane, sand, 4, 4);
+
+  var skybox = SkyBox();
+  skybox.rotation.x = degreesToRadians(90);
+  scene.add(skybox);
+
+  var pole1 = LightPole(new THREE.Vector3(200, -455, 6.5), lightColor);
   scene.add(pole1.light);
   scene.add(pole1);
 
-  var pole2 = LightPole(new THREE.Vector3(50, -300, 6.5), lightColor);
+  var pole2 = LightPole(new THREE.Vector3(0, -455, 6.5), lightColor);
   scene.add(pole2.light);
   scene.add(pole2);
 
-  var pole3 = LightPole(new THREE.Vector3(-50, -300, 6.5), lightColor);
+  var pole3 = LightPole(new THREE.Vector3(-200, -455, 6.5), lightColor);
   scene.add(pole3.light);
   scene.add(pole3);
 
-  var pole4 = LightPole(new THREE.Vector3(-150, -300, 6.5), lightColor);
+  var pole4 = LightPole(new THREE.Vector3(-350, -455, 6.5), lightColor);
   scene.add(pole4.light);
   scene.add(pole4);
 
-  var pole5 = LightPole(new THREE.Vector3(0, 180, 6.5), lightColor);
+  var pole5 = LightPole(new THREE.Vector3(216, 220, 6.5), lightColor);
   scene.add(pole5.light);
   scene.add(pole5);
 
-  var pole6 = LightPole(new THREE.Vector3(170, 300, 6.5), lightColor);
+  var pole6 = LightPole(new THREE.Vector3(500, 510, 6.5), lightColor);
   scene.add(pole6.light);
   scene.add(pole6);
 
-  var pole7 = LightPole(new THREE.Vector3(-220, -10, 6.5), lightColor);
+  var pole7 = LightPole(new THREE.Vector3(-300, -10, 6.5), lightColor);
   scene.add(pole7.light);
   scene.add(pole7);
 
-  var pole8 = LightPole(new THREE.Vector3(-300, 270, 6.5), lightColor);
+  var pole8 = LightPole(new THREE.Vector3(-470, 550, 6.5), lightColor);
   scene.add(pole8.light);
   scene.add(pole8);
+
+  var pole9 = LightPole(new THREE.Vector3(-540, -385, 6.5), lightColor);
+  scene.add(pole9.light);
+  scene.add(pole9);
 
   // Kart
   var kart = Kart(kartInitialPosition);
@@ -126,8 +143,8 @@ function main() {
 
   // Configurando montanha baixa
   var { mountainLowObject1, mountainLowObject2 } = setLowMountain(
-    180,
-    170,
+    480,
+    200,
     objectMaterial
   );
   scene.add(mountainLowObject1);
@@ -138,7 +155,7 @@ function main() {
     mountainHighObject1,
     mountainHighObject2,
     mountainHighObject3,
-  } = setHighMountain(-120, 20, objectMaterial);
+  } = setHighMountain(-70, 100, objectMaterial);
   scene.add(mountainHighObject1);
   scene.add(mountainHighObject2);
   scene.add(mountainHighObject3);
@@ -250,7 +267,8 @@ function main() {
   // Adiciona elementos na cena
   function addIntoScene() {
     scene.add(plane);
-    scene.add(plane.line);
+    scene.add(secondaryPlane);
+    scene.add(skybox);
     scene.add(mountainLowObject2);
     scene.add(mountainLowObject1);
     scene.add(mountainHighObject1);
@@ -264,13 +282,15 @@ function main() {
     scene.add(pole6);
     scene.add(pole7);
     scene.add(pole8);
-    scene.add(statue);
+    scene.add(pole9);
+    if(statue) scene.add(statue);
   }
 
   // Remove elementos da cena
   function removeFromScene() {
     scene.remove(plane);
-    scene.remove(plane.line);
+    scene.remove(secondaryPlane);
+    scene.remove(skybox);
     scene.remove(mountainLowObject2);
     scene.remove(mountainLowObject1);
     scene.remove(mountainHighObject1);
@@ -284,6 +304,7 @@ function main() {
     scene.remove(pole6);
     scene.remove(pole7);
     scene.remove(pole8);
+    scene.remove(pole9);
     scene.remove(statue);
   }
 
@@ -320,6 +341,11 @@ function main() {
       // Freio para o Kart mais rápido que a apenas a fricção do mesmo
       speed -= breakFactor * acceleration;
       kart.translateY(speed);
+    } else {
+      if ((speed * -1) < maxSpeed/2) {
+        speed -= acceleration;
+      }
+      kart.translateY(speed);
     }
   }
 
@@ -351,8 +377,7 @@ function main() {
         wheelRotationAngle -= 6;
       }
     } else {
-      // Voltar a roda a rotação inicial se não estiver apertando seta pra esquerda
-      // nem a direita
+      // Voltar a roda a rotação inicial se não estiver apertando seta pra esquerda nem a direita
       if (wheelRotationAngle !== 90 && wheelRotationAngle > 90)
         wheelRotationAngle -= 6;
       else if (wheelRotationAngle !== 90 && wheelRotationAngle < 90)
@@ -372,6 +397,7 @@ function main() {
 
       this.onEnableSunLight = function () {
         sunLight.visible = this.sunLight;
+        skybox.visible = this.sunLight;
       };
 
       this.onEnableSpotLight = function () {
@@ -387,6 +413,7 @@ function main() {
         pole6.light.visible = this.poles;
         pole7.light.visible = this.poles;
         pole8.light.visible = this.poles;
+        pole9.light.visible = this.poles;
       };
     })();
     var gui = new dat.GUI();
@@ -412,7 +439,7 @@ function main() {
 
   function render() {
     trackballControls.update();
-    if (speed < 0) speedometer.changeMessage("Velocidade: " + 0.0);
+    if (speed < 0) speedometer.changeMessage("Velocidade: " + (speed * -30).toFixed(1));
     else speedometer.changeMessage("Velocidade: " + (speed * 30).toFixed(1));
     stats.update();
     if (gameModeCamera) {
@@ -427,6 +454,12 @@ function main() {
 
     if ((upUp || downUp) && speed > 0) {
       speed -= frictionFactor * acceleration;
+
+      // Margem de erro para zerar a velocidade
+      if(speed> -0.04 && speed < 0.04) speed = 0;
+      kart.translateY(speed);
+    } else if ((upUp || downUp) && speed < 0) {
+      speed += frictionFactor * acceleration;
       kart.translateY(speed);
     } else {
       upUp = false;
@@ -436,6 +469,7 @@ function main() {
   }
 }
 
+//*========================== Componentes do Kart ==========================*
 // Componente Kart
 function Kart(initialPosition = new THREE.Vector3(0, -200, 1.2)) {
   var DISTANCE_BETWEEN_WHEELS = 6;
@@ -473,46 +507,63 @@ function Kart(initialPosition = new THREE.Vector3(0, -200, 1.2)) {
   return mainAxle.rotateX(degreesToRadians(180));
 }
 
-//*========================== Componentes do Kart ==========================*
-// Componente do plano
-function GroundPlane() {
-  const planeGeometry = new THREE.PlaneGeometry(700, 700, 40, 40);
-  planeGeometry.translate(0.0, 0.0, -0.02);
-  const planeMaterial = new THREE.MeshPhongMaterial({
-    color: "rgba(20, 30, 110)",
-    side: THREE.DoubleSide,
-    polygonOffset: true,
-    polygonOffsetFactor: 1,
-    polygonOffsetUnits: 1,
-  });
-  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  plane.receiveShadow = true;
-  const wireframe = new THREE.WireframeGeometry(planeGeometry);
-  const line = new THREE.LineSegments(wireframe);
-  line.material.color.setStyle("rgb(180, 180, 180)");
-  plane.geometry = planeGeometry;
-  plane.line = line;
-  return plane;
-}
-
 // Componente da carenagem
 function Careen(distanceBetweenWheels) {
+  const textureLoader = new THREE.TextureLoader();
   // Carenagem Principal
   const mainCareen = GenerateBox(0.5, 4, 4, "#FFA500");
 
   // Carenagem da cabine
-  const cabin1 = GenerateBox(0.5, 4, 1, "#1a1a1a");
-  const cabin2 = GenerateBox(0.5, 4, 1, "#1a1a1a");
+  const cabin1 = GenerateBox(0.5, 4, 1, "#000");
+  const cabin2 = GenerateBox(0.5, 4, 1, "#000");
+
+  // Adesivos 1
+  const tribalGeo = new THREE.PlaneGeometry(1, 4, 40, 40);
+  const tribalMaterial = new THREE.MeshPhongMaterial({
+    side: THREE.DoubleSide,
+  });
+  const tribal = new THREE.Mesh(tribalGeo, tribalMaterial);
+  const tribalTexture = textureLoader.load('./assets/tribal.png');
+  setTexture(tribal, tribalTexture, 1, 1);
+  tribal.rotateY(degreesToRadians(90));
+  tribal.position.x = 0.26;
+  cabin1.add(tribal);
+
+  // Adesivos 2
+  const tribal2Geo = new THREE.PlaneGeometry(1, 4, 40, 40);
+  const tribal2Material = new THREE.MeshPhongMaterial({
+    side: THREE.DoubleSide,
+  });
+  const tribal2 = new THREE.Mesh(tribal2Geo, tribal2Material);
+  setTexture(tribal2, tribalTexture, 1, 1);
+  tribal2.rotateY(degreesToRadians(90));
+  tribal2.position.x = 0.26;
+  tribal2.rotateY(degreesToRadians(180));
+  cabin2.add(tribal2);
 
   // Assento
-  const seat = GenerateBox(1.5, 0.3, 2, "#1a1a1a");
+  const seat = GenerateBox(1.5, 0.3, 2, "#000");
   mainCareen.add(seat);
   seat.translateY(-2).translateX(1);
 
   // Painel
-  const panel = GenerateBox(1.4, 1, 2, "#1a1a1a");
+  const panel = GenerateBox(1.4, 1, 2, "#000");
   mainCareen.add(panel);
   panel.translateX(0.5).translateY(1.5);
+
+
+  const rbGeo = new THREE.PlaneGeometry(2, 1, 40, 40);
+  const rbMaterial = new THREE.MeshPhongMaterial({
+    side: THREE.DoubleSide,
+  });
+  const rb = new THREE.Mesh(rbGeo, rbMaterial);
+  const rbTexture = textureLoader.load('./assets/rb.png');
+  setTexture(rb, rbTexture, 1, 1);
+  rb.rotateY(degreesToRadians(90));
+  rb.rotateZ(degreesToRadians(180));
+  rb.position.x = 0.71;
+  panel.add(rb);
+
 
   // Barra da direção
   const steeringWheelBar = GenerateBar(1);
@@ -521,7 +572,7 @@ function Careen(distanceBetweenWheels) {
 
   // Volante
   const geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 60);
-  const material = new THREE.MeshPhongMaterial({ color: "#1a1a1a" });
+  const material = new THREE.MeshPhongMaterial({ color: "#000" });
   const steeringWheel = new THREE.Mesh(geometry, material);
   steeringWheelBar.add(steeringWheel);
   steeringWheel.translateY(-0.5);
@@ -543,6 +594,20 @@ function Careen(distanceBetweenWheels) {
   const frontBumper = GenerateBox(0.5, 1, 4, "#FFA500");
   frontCareen.add(frontBumper);
   frontBumper.translateY(0.5);
+
+  // Adesivos 3
+  const skullGeo = new THREE.PlaneGeometry(4, 1, 40, 40);
+  const skullMaterial = new THREE.MeshPhongMaterial({
+    side: THREE.DoubleSide,
+    color: '#FFA500'
+  });
+  const skull = new THREE.Mesh(skullGeo, skullMaterial);
+  skull.rotateY(11);
+  const skullTexture = textureLoader.load('./assets/caveira.jpg');
+  setTexture(skull, skullTexture, 1, 1);
+  frontBumper.add(skull);
+  skull.position.x = 0.26;
+  skull.rotateZ(degreesToRadians(180));
 
   // Carenagem Traseira
   const rearCareen = GenerateBox(1.0, 2, 2, "#FFA500");
@@ -619,11 +684,67 @@ function Axle(length) {
 }
 
 //*========================== Componentes do Mundo ==========================*
+// Componente do plano
+function GroundPlane() {
+  const planeGeometry = new THREE.PlaneGeometry(1200, 1200, 40, 40);
+  planeGeometry.translate(0.0, 0.0, -0.02);
+  const planeMaterial = new THREE.MeshPhongMaterial({
+    side: THREE.DoubleSide,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  plane.receiveShadow = true;
+  return plane;
+}
+
+// Componente do plano secundário
+function SecondaryPlane() {
+  const planeGeometry = new THREE.PlaneGeometry(2400, 2400, 40, 40);
+  planeGeometry.translate(0.0, 0.0, -0.02);
+  const planeMaterial = new THREE.MeshPhongMaterial({
+    side: THREE.DoubleSide,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  plane.receiveShadow = true;
+  return plane;
+}
+
+// Configura e retorna componente do SkyBox
+function SkyBox() {
+  const materialArray = [];
+  const texture_ft = new THREE.TextureLoader().load('./assets/skybox/arid2_ft.jpg');
+  const texture_bk = new THREE.TextureLoader().load('./assets/skybox/arid2_bk.jpg');
+  const texture_up = new THREE.TextureLoader().load('./assets/skybox/arid2_up.jpg');
+  const texture_dn = new THREE.TextureLoader().load('./assets/skybox/arid2_dn.jpg');
+  const texture_rt = new THREE.TextureLoader().load('./assets/skybox/arid2_rt.jpg');
+  const texture_lf = new THREE.TextureLoader().load('./assets/skybox/arid2_lf.jpg');
+    
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+  materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+
+  for (let i = 0; i < 6; i++)
+    materialArray[i].side = THREE.BackSide;
+
+  const skyboxGeo = new THREE.BoxGeometry(2400, 2400, 2400);
+  const skybox = new THREE.Mesh(skyboxGeo, materialArray);
+
+  return skybox;
+}
+
 // Poste de iluminação
 function LightPole(position, lightColor) {
-  const pointLight = new THREE.PointLight(lightColor);
+  const spotLight = new THREE.SpotLight(lightColor, 2, 0, degreesToRadians(45), 0.05, 2);
 
-  const pole = GenerateBar(15);
+  const pole = GenerateBar(15, 'black');
   pole.castShadow = true;
 
   pole.rotateX(degreesToRadians(90));
@@ -633,7 +754,20 @@ function LightPole(position, lightColor) {
   pole.add(light);
   light.translateY(8);
 
-  pole.light = setPointLight(pointLight, position);
+  spotLight.position.copy(new THREE.Vector3(position.x, position.y, position.z + 8))
+
+  spotLight.shadow.mapSize.width = 1024;
+  spotLight.shadow.mapSize.height = 1024;
+  
+  spotLight.shadow.camera.near = 5;
+  spotLight.shadow.camera.far = 600;
+  spotLight.shadow.camera.fov = 30;
+
+  spotLight.castShadow = true;
+  spotLight.name = "Spot Light";
+  spotLight.visible = true;
+
+  pole.light = spotLight;
   return pole;
 }
 
@@ -1015,10 +1149,10 @@ function GenerateBox(width, height, depth, color) {
 }
 
 // Gerador do elemento cilindro
-function GenerateBar(length) {
+function GenerateBar(length, color = '#c0c0c0') {
   const axleBarGeometry = new THREE.CylinderGeometry(0.1, 0.1, length, 25);
   const axleBarMaterial = new THREE.MeshPhongMaterial({
-    color: "#c0c0c0",
+    color: color,
   });
   const axleBar = new THREE.Mesh(axleBarGeometry, axleBarMaterial);
   return axleBar;
@@ -1113,6 +1247,7 @@ function setPointLight(light, position) {
   return light;
 }
 
+// Adicionar um array a scene
 function addArrayToScene(scene, objects) {
   objects.forEach((obj) => {
     scene.add(obj);
@@ -1140,8 +1275,18 @@ function normalizeAndRescaleStatue(obj, newScale) {
   return obj;
 }
 
+// Colocar textura em um componente
+function setTexture(component, texture, x, y) {
+  component.material.map = texture;
+  component.material.map.repeat.set(x, y);
+  component.material.map.wrapS = THREE.RepeatWrapping;
+  component.material.map.wrapT = THREE.RepeatWrapping;
+  component.material.map.minFilter = THREE.LinearFilter;
+  component.material.map.magFilter = THREE.LinearFilter;
+}
+
 // Carregando arquivo externo
-function loadOBJFile(
+async function loadOBJFile(
   object,
   scene,
   modelPath,
@@ -1152,7 +1297,7 @@ function loadOBJFile(
   positionY
 ) {
   currentModel = modelName;
-
+  let returnObj;
   var manager = new THREE.LoadingManager();
 
   var mtlLoader = new THREE.MTLLoader(manager);
@@ -1168,7 +1313,6 @@ function loadOBJFile(
       function (obj) {
         obj.name = modelName;
         obj.visible = visibility;
-        // Set 'castShadow' property for each children of the group
         obj.traverse(function (child) {
           child.castShadow = false;
         });
@@ -1177,19 +1321,22 @@ function loadOBJFile(
           if (node.material) node.material.side = THREE.DoubleSide;
         });
 
-        var obj = normalizeAndRescaleStatue(obj, desiredScale);
-        var obj = fixStatuePosition(obj, positionX, positionY, 360, 90);
-        object = obj;
+        normalizeAndRescaleStatue(obj, desiredScale);
+        fixStatuePosition(obj, positionX, positionY, 360, 90);
+        returnObj = obj;
         scene.add(obj);
       },
       onProgress,
       onError
     );
   });
+  return returnObj;
 }
 
+// Callback de erro
 function onError() {}
 
+// Callback de progresso
 function onProgress(xhr, model) {
   if (xhr.lengthComputable) {
     var percentComplete = (xhr.loaded / xhr.total) * 100;
