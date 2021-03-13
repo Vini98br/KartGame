@@ -7,7 +7,7 @@ function main() {
   var renderer = initRenderer();
 
   // Posição inicial do kart
-  var kartInitialPosition = new THREE.Vector3(0, -425, 1.2);
+  var kartInitialPosition = new THREE.Vector3(0, -400, 1.2);
   // Posição do kart no centro
   var centerKartPosition = new THREE.Vector3(0, 0, 1.2);
   // Guarda posição do kart
@@ -31,8 +31,12 @@ function main() {
   // Velocímetro
   var speedometer = new SecondaryBox("Velocidade: " + speed);
 
+  // Modos de camera disponíveis
+  var cameraModes = ["game", "cockpit", "inspection"];
+  // Index de modo de camera atual
+  var cameraModeIndex = 0;
   // Modo de camera
-  var gameModeCamera = true;
+  var gameModeCamera = 0;
   // Caixa de informações modo Jogo
   var gameModeControls = configureInfoBox(new InfoBox(), true);
   // Caixa de informações modo inspeção
@@ -52,14 +56,16 @@ function main() {
     0.1,
     10000
   );
-  scene.add(camera);
   camera.position.set(0, 10, 50);
   camera.up.set(0, 0, 1);
-
+  var cameraRotation = 0;
+  
   var trackballControls = new THREE.TrackballControls(
     camera,
     renderer.domElement
-  );
+    );
+    
+  scene.add(camera);
 
   // Cor da luz
   var lightColor = "rgb(255,255,255)";
@@ -131,8 +137,6 @@ function main() {
   // Kart
   var kart = Kart(kartInitialPosition);
   scene.add(kart);
-  // Fazendo a camera "olhar" para o eixo traseiro do kart
-  camera.lookAt(kart.rearAxle.position);
 
   // Montanhas
   var mountainColor = "rgb(100, 70, 20)";
@@ -160,17 +164,119 @@ function main() {
   scene.add(mountainHighObject2);
   scene.add(mountainHighObject3);
 
+  // Array que salva todos os objetos externos adicionados
+  var objectArray = new Array();
   //Estatua
-  var statue = null;
   loadOBJFile(
-    statue,
     scene,
+    objectArray,
     "assets/",
     "sm_statue_lion_lod0",
     true,
     45,
-    -230,
-    200
+    -250,
+    180
+  );
+
+  // Podio
+  loadOBJFile (
+    scene,
+    objectArray,
+    "assets/",
+    "Cart_Rigged",
+    true,
+    10,
+    110,
+    -445
+  );
+
+  // Cones
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    50,
+    -320
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    40,
+    -320
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    60,
+    -320
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    70,
+    -320
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    40,
+    -420
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    50,
+    -420
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    60,
+    -420
+  );
+
+  loadOBJFile(
+    scene,
+    objectArray,
+    "assets/",
+    "lwpltrfccon1",
+    true,
+    5,
+    70,
+    -420
   );
 
   // Ouvindo mudanças no tamanho da tela
@@ -187,12 +293,15 @@ function main() {
 
   // Função que altera o modo da câmera
   function changeCameraMode() {
-    if (speed > 0) {
-      message("error-changing-mode");
-      return;
-    }
-    gameModeCamera = !gameModeCamera;
-    if (gameModeCamera) {
+
+    // Seta o novo modo de camera
+    if(cameraModeIndex < 2){
+      cameraModeIndex++;
+    } else {
+      cameraModeIndex = 0;
+    };
+
+    if (cameraModeIndex == 0) {  // Camera modo jogo
       returnKartPositionInGame();
       message("game-mode");
       showElement(gameModeControls.infoBox);
@@ -201,9 +310,22 @@ function main() {
       // Adiciona na cena
       addIntoScene();
 
-      trackballControls.enabled = false;
+      trackballControls.enabled = true;
       moveGameCamera();
-    } else {
+    } 
+    else if (cameraModeIndex == 1) {
+      //returnKartPositionInGame();
+      message("cockpit-mode");
+      showElement(gameModeControls.infoBox);
+      hideElement(inspectionModeControls.infoBox);
+
+      // Adiciona na cena
+      addIntoScene();
+
+      trackballControls.enabled = false;
+      moveCockpitCamera(kart);
+    }
+    else {  // Camera modo inspecao
       saveKartPosition.copy(kart.position);
       saveKartRotation.copy(kart.rotation);
       resetKart();
@@ -213,7 +335,7 @@ function main() {
 
       // Removes da cena
       removeFromScene();
-
+ 
       trackballControls.enabled = true;
       moveInspectionCamera();
     }
@@ -234,6 +356,66 @@ function main() {
     camera.position.z = cameraOffset.z;
 
     camera.lookAt(kart.position);
+  }
+
+  //Função que lida com movimentação da camera no modo Cockpit
+  function moveCockpitCamera(kartForPosition) {
+    var relativeCameraOffset = new THREE.Vector3(2, -2 , 0);
+
+    // Cálculo da distância entre a câmera e o kart utilizando a posição do
+    // kart como matriz de transformação do Vector3 para Matrix4
+    var cameraOffset = relativeCameraOffset.applyMatrix4(kart.matrixWorld);
+
+    // Posiciona a câmera de acordo com distância calculada
+    camera.position.x = cameraOffset.x;
+    camera.position.y = cameraOffset.y;
+    camera.position.z = cameraOffset.z;
+
+    console.log("camera - antes", camera.position);
+
+    if(kart.position.x > 0) {
+      console.log("x - if 1");
+      if(camera.position.x > 0 && (kart.position.x - camera.position.x) > 2) {
+        console.log("1");
+        camera.position.x = kart.position.x - 2;
+      } else if(camera.position.x < 0 && (kart.position.x - camera.position.x) > 2) {
+        console.log("2");
+        camera.position.x = kart.position.x - 2;
+      }
+    } else {
+      console.log(" x - if 2");
+      if(camera.position.x > 0 && camera.position.x > (kart.position.x + 2)) {
+        console.log("3");
+        camera.position.x = kart.position.x + 2;
+      } else if(camera.position.x < 0 && camera.position.x < (kart.position.x - 2) ) {
+        console.log("4");
+        camera.position.x = kart.position.x - 2;
+      }
+    }
+
+    if(kart.position.y > 0) {
+      console.log("y - if 1");
+      if(camera.position.y > 0 && (kart.position.y - camera.position.y) > 2) {
+        console.log("1");
+        camera.position.y = kart.position.y - 2;
+      } else if(camera.position.y < 0 && (kart.position.y - camera.position.y) > 2) {
+        console.log("2");
+        camera.position.y = kart.position.y + 2;
+      }
+    } else {
+      console.log("y - if 2");
+      if(camera.position.y > 0 && camera.position.y > (kart.position.y + 2)) {
+        console.log("3");
+        camera.position.y = kart.position.y - 2;
+      } else if(camera.position.y < 0 && camera.position.y < (kart.position.y - 2) ) {
+        console.log("4");
+        camera.position.y = kart.position.y + 2;
+      }
+    }
+
+    console.log("kart - ", kart.position);
+    camera.lookAt(kart.position);
+    console.log("camera pos- ", camera.position);
   }
 
   // Função que lida com movimentação da camera no modo Inspeção
@@ -283,7 +465,9 @@ function main() {
     scene.add(pole7);
     scene.add(pole8);
     scene.add(pole9);
-    if(statue) scene.add(statue);
+    objectArray.forEach((obj) => {
+      obj.visible = true;
+    });
   }
 
   // Remove elementos da cena
@@ -305,7 +489,9 @@ function main() {
     scene.remove(pole7);
     scene.remove(pole8);
     scene.remove(pole9);
-    scene.remove(statue);
+    objectArray.forEach((obj) => {
+      obj.visible = false;
+    });
   }
 
   // Função que lida com movimentação das rodas
@@ -352,8 +538,9 @@ function main() {
   // Função para lidar com atualizações no teclado
   function keyboardUpdate() {
     keyboard.update();
+
     kartRotationAngle = degreesToRadians(speed / 2);
-    if (gameModeCamera) {
+    if (cameraModeIndex == 0 || cameraModeIndex == 1) {
       // Mostrar velocímetro
       showElement(speedometer.box);
 
@@ -361,6 +548,7 @@ function main() {
       if (keyboard.pressed("down")) brake();
       if (keyboard.up("down")) downUp = true;
       if (keyboard.up("up")) upUp = true;
+
     } else {
       // Esconder velocímetro
       hideElement(speedometer.box);
@@ -442,19 +630,13 @@ function main() {
     if (speed < 0) speedometer.changeMessage("Velocidade: " + (speed * -30).toFixed(1));
     else speedometer.changeMessage("Velocidade: " + (speed * 30).toFixed(1));
     stats.update();
-    if (gameModeCamera) {
-      if (trackballControls.enabled) trackballControls.enabled = false;
-    } else {
-      trackballControls.update();
-    }
-    requestAnimationFrame(render);
+    
     keyboardUpdate();
     moveWheel();
-    if (gameModeCamera) moveGameCamera();
-
+        
     if ((upUp || downUp) && speed > 0) {
       speed -= frictionFactor * acceleration;
-
+      
       // Margem de erro para zerar a velocidade
       if(speed> -0.04 && speed < 0.04) speed = 0;
       kart.translateY(speed);
@@ -465,6 +647,20 @@ function main() {
       upUp = false;
       downUp = false;
     }
+
+    if (cameraModeIndex == 0) {
+      trackballControls.enabled = true;
+      trackballControls.update();
+      moveGameCamera();
+    } else if (cameraModeIndex == 1) {
+      trackballControls.enabled = false;
+      moveCockpitCamera(kart);
+    } else {
+      trackballControls.enabled = true;
+      trackballControls.update();
+    }    
+
+    requestAnimationFrame(render);
     renderer.render(scene, camera); // Render scene
   }
 }
@@ -500,9 +696,10 @@ function Kart(initialPosition = new THREE.Vector3(0, -200, 1.2)) {
   render();
   function render() {
     requestAnimationFrame(render);
-
+    mainAxle.mainCareen = mainCareen;
     mainAxle.frontAxle = frontAxle;
     mainAxle.rearAxle = rearAxle;
+    mainAxle.mainCareen.steeringWheel = mainCareen.steeringWheel;
   }
   return mainAxle.rotateX(degreesToRadians(180));
 }
@@ -633,6 +830,7 @@ function Careen(distanceBetweenWheels) {
   airfoilSupportBar1.add(airfoilPlate);
   airfoilPlate.rotateZ(degreesToRadians(90)).translateZ(-1).translateX(-0.5);
 
+  mainCareen.steeringWheel = steeringWheel;
   return mainCareen;
 }
 
@@ -1285,52 +1483,42 @@ function setTexture(component, texture, x, y) {
   component.material.map.magFilter = THREE.LinearFilter;
 }
 
-// Carregando arquivo externo
-async function loadOBJFile(
-  object,
-  scene,
-  modelPath,
-  modelName,
-  visibility,
-  desiredScale,
-  positionX,
-  positionY
-) {
-  currentModel = modelName;
-  let returnObj;
-  var manager = new THREE.LoadingManager();
+function loadOBJFile(scene, objectArray, modelPath, modelName, visibility, desiredScale, positionX, positionY)
+{
+    currentModel = modelName;
 
-  var mtlLoader = new THREE.MTLLoader(manager);
-  mtlLoader.setPath(modelPath);
-  mtlLoader.load(modelName + ".mtl", function (materials) {
-    materials.preload();
+    var manager = new THREE.LoadingManager( );
 
-    var objLoader = new THREE.OBJLoader(manager);
-    objLoader.setMaterials(materials);
-    objLoader.setPath(modelPath);
-    objLoader.load(
-      modelName + ".obj",
-      function (obj) {
-        obj.name = modelName;
-        obj.visible = visibility;
-        obj.traverse(function (child) {
-          child.castShadow = false;
-        });
+    var mtlLoader = new THREE.MTLLoader( manager );
+    mtlLoader.setPath( modelPath );
+    mtlLoader.load( modelName + '.mtl', function ( materials ) {
+         materials.preload();
 
-        obj.traverse(function (node) {
-          if (node.material) node.material.side = THREE.DoubleSide;
-        });
+         var objLoader = new THREE.OBJLoader( manager );
+         objLoader.setMaterials(materials);
+         objLoader.setPath(modelPath);
+         objLoader.load( modelName + ".obj", function ( obj ) {
+           obj.name = modelName;
+           obj.visible = visibility;
+           // Set 'castShadow' property for each children of the group
+           obj.traverse( function (child)
+           {
+             child.castShadow = true;
+           });
 
-        normalizeAndRescaleStatue(obj, desiredScale);
-        fixStatuePosition(obj, positionX, positionY, 360, 90);
-        returnObj = obj;
-        scene.add(obj);
-      },
-      onProgress,
-      onError
-    );
-  });
-  return returnObj;
+           obj.traverse( function( node )
+           {
+             if( node.material ) node.material.side = THREE.DoubleSide;
+           });
+
+           var obj = normalizeAndRescaleStatue(obj, desiredScale);
+           var obj = fixStatuePosition(obj, positionX, positionY, 360, 90);
+
+           scene.add(obj);
+           objectArray.push(obj);
+
+         }, onProgress, onError );
+    });
 }
 
 // Callback de erro
