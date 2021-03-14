@@ -373,43 +373,55 @@ function main() {
 
     console.log("camera - antes", camera.position);
 
-    if(kart.position.x > 0) {
-      console.log("x - if 1");
-      if(camera.position.x > 0 && (kart.position.x - camera.position.x) > 2) {
-        console.log("1");
-        camera.position.x = kart.position.x - 2;
-      } else if(camera.position.x < 0 && (kart.position.x - camera.position.x) > 2) {
-        console.log("2");
-        camera.position.x = kart.position.x - 2;
+    if(kart.position.x >= 0) {
+      if(camera.position.x >= 0) {
+        if((kart.position.x - camera.position.x) > 2) {
+          camera.position.x = kart.position.x - 2;
+        } else if((kart.position.x - camera.position.x) < 2) {
+          camera.position.x = kart.position.x + 2;
+        } 
+      } else {
+        if((kart.position.x - camera.position.x) > 2) {
+          camera.position.x = kart.position.x - 2;
+        }
       }
     } else {
-      console.log(" x - if 2");
-      if(camera.position.x > 0 && camera.position.x > (kart.position.x + 2)) {
-        console.log("3");
-        camera.position.x = kart.position.x + 2;
-      } else if(camera.position.x < 0 && camera.position.x < (kart.position.x - 2) ) {
-        console.log("4");
-        camera.position.x = kart.position.x - 2;
+      if(camera.position.x >= 0) {
+        if((kart.position.x - camera.position.x) < -2) {
+          camera.position.x = kart.position.x + 2;
+        } 
+      } else {
+        if((kart.position.x - camera.position.x) < -2) {
+          camera.position.x = kart.position.x + 2;
+        } else if((kart.position.x - camera.position.x) > 2) {
+          camera.position.x = kart.position.x - 2;
+        }
       }
     }
 
-    if(kart.position.y > 0) {
-      console.log("y - if 1");
-      if(camera.position.y > 0 && (kart.position.y - camera.position.y) > 2) {
-        console.log("1");
-        camera.position.y = kart.position.y - 2;
-      } else if(camera.position.y < 0 && (kart.position.y - camera.position.y) > 2) {
-        console.log("2");
-        camera.position.y = kart.position.y + 2;
+    if(kart.position.y >= 0) {
+      if(camera.position.y >= 0) {
+        if((kart.position.y - camera.position.y) > 2) {
+          camera.position.y = kart.position.y - 2;
+        } else if((kart.position.y - camera.position.y) < 2) {
+          camera.position.y = kart.position.y + 2;
+        } 
+      } else {
+        if((kart.position.y - camera.position.y) > 2) {
+          camera.position.y = kart.position.y - 2;
+        }
       }
     } else {
-      console.log("y - if 2");
-      if(camera.position.y > 0 && camera.position.y > (kart.position.y + 2)) {
-        console.log("3");
-        camera.position.y = kart.position.y - 2;
-      } else if(camera.position.y < 0 && camera.position.y < (kart.position.y - 2) ) {
-        console.log("4");
-        camera.position.y = kart.position.y + 2;
+      if(camera.position.y >= 0) {
+        if((kart.position.y - camera.position.y) < -2) {
+          camera.position.y = kart.position.y + 2;
+        } 
+      } else {
+        if((kart.position.y - camera.position.y) < -2) {
+          camera.position.y = kart.position.y + 2;
+        } else if((kart.position.y - camera.position.y) > 2) {
+          camera.position.y = kart.position.y - 2;
+        }
       }
     }
 
