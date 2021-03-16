@@ -42,6 +42,23 @@ function main() {
   // Caixa de informações modo inspeção
   var inspectionModeControls = configureInfoBox(new InfoBox(), false);
 
+  const geometryCamera = new THREE.BoxGeometry(1, 1, 1);
+  const materialCamera = new THREE.MeshPhongMaterial({ color: 0xdcdcdc });
+  const cubeCamera = new THREE.Mesh(geometryCamera, materialCamera);
+
+  function changeCamera(initialPosition) {
+    var position = initialPosition;
+    var camera = new THREE.PerspectiveCamera(
+      90,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      10000
+    );
+    camera.position.copy(position);
+    camera.up.set(0, 0, 1);
+    return camera;
+  }
+
   // Instância do teclado
   var keyboard = new KeyboardState();
   // Flag pra quando a seta pra cima é solta
@@ -58,12 +75,11 @@ function main() {
   );
   camera.position.set(0, 10, 50);
   camera.up.set(0, 0, 1);
-  var cameraRotation = 0;
   
   var trackballControls = new THREE.TrackballControls(
     camera,
     renderer.domElement
-    );
+  );
     
   scene.add(camera);
 
@@ -302,6 +318,8 @@ function main() {
     };
 
     if (cameraModeIndex == 0) {  // Camera modo jogo
+      cubeCamera.remove(camera);
+      kart.mainCareen.remove(cubeCamera);
       returnKartPositionInGame();
       message("game-mode");
       showElement(gameModeControls.infoBox);
@@ -323,9 +341,17 @@ function main() {
       addIntoScene();
 
       trackballControls.enabled = false;
-      moveCockpitCamera(kart);
+      camera = changeCamera(new THREE.Vector3(2, -1.5, 0))
+      
+      camera.rotateX(degreesToRadians(90));
+      camera.rotateZ(degreesToRadians(-90));
+
+      cubeCamera.add(camera);
+      kart.mainCareen.add(cubeCamera);
     }
     else {  // Camera modo inspecao
+      cubeCamera.remove(camera);
+      kart.mainCareen.remove(cubeCamera);
       saveKartPosition.copy(kart.position);
       saveKartRotation.copy(kart.rotation);
       resetKart();
@@ -354,84 +380,12 @@ function main() {
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
-
     camera.lookAt(kart.position);
-  }
-
-  //Função que lida com movimentação da camera no modo Cockpit
-  function moveCockpitCamera(kartForPosition) {
-    var relativeCameraOffset = new THREE.Vector3(2, -2 , 0);
-
-    // Cálculo da distância entre a câmera e o kart utilizando a posição do
-    // kart como matriz de transformação do Vector3 para Matrix4
-    var cameraOffset = relativeCameraOffset.applyMatrix4(kart.matrixWorld);
-
-    // Posiciona a câmera de acordo com distância calculada
-    camera.position.x = cameraOffset.x;
-    camera.position.y = cameraOffset.y;
-    camera.position.z = cameraOffset.z;
-
-    console.log("camera - antes", camera.position);
-
-    if(kart.position.x >= 0) {
-      if(camera.position.x >= 0) {
-        if((kart.position.x - camera.position.x) > 2) {
-          camera.position.x = kart.position.x - 2;
-        } else if((kart.position.x - camera.position.x) < 2) {
-          camera.position.x = kart.position.x + 2;
-        } 
-      } else {
-        if((kart.position.x - camera.position.x) > 2) {
-          camera.position.x = kart.position.x - 2;
-        }
-      }
-    } else {
-      if(camera.position.x >= 0) {
-        if((kart.position.x - camera.position.x) < -2) {
-          camera.position.x = kart.position.x + 2;
-        } 
-      } else {
-        if((kart.position.x - camera.position.x) < -2) {
-          camera.position.x = kart.position.x + 2;
-        } else if((kart.position.x - camera.position.x) > 2) {
-          camera.position.x = kart.position.x - 2;
-        }
-      }
-    }
-
-    if(kart.position.y >= 0) {
-      if(camera.position.y >= 0) {
-        if((kart.position.y - camera.position.y) > 2) {
-          camera.position.y = kart.position.y - 2;
-        } else if((kart.position.y - camera.position.y) < 2) {
-          camera.position.y = kart.position.y + 2;
-        } 
-      } else {
-        if((kart.position.y - camera.position.y) > 2) {
-          camera.position.y = kart.position.y - 2;
-        }
-      }
-    } else {
-      if(camera.position.y >= 0) {
-        if((kart.position.y - camera.position.y) < -2) {
-          camera.position.y = kart.position.y + 2;
-        } 
-      } else {
-        if((kart.position.y - camera.position.y) < -2) {
-          camera.position.y = kart.position.y + 2;
-        } else if((kart.position.y - camera.position.y) > 2) {
-          camera.position.y = kart.position.y - 2;
-        }
-      }
-    }
-
-    console.log("kart - ", kart.position);
-    camera.lookAt(kart.position);
-    console.log("camera pos- ", camera.position);
   }
 
   // Função que lida com movimentação da camera no modo Inspeção
   function moveInspectionCamera() {
+    trackballControls = initTrackballControls(camera, renderer);
     var distanceX = 5;
     var distanceY = -10;
     var distanceZ = 10;
@@ -506,6 +460,21 @@ function main() {
     });
   }
 
+  function onMouseWheel(event) {
+    if (cameraModeIndex === 0) {
+      event.preventDefault();
+      if(camera.fov >= 30 && camera.fov <= 150 ){
+        camera.fov += event.deltaY / 100;
+      } else {
+        camera.fov = 30;
+      }
+      if( camera.fov > 150) {
+        camera.fov = 150;
+      }
+      camera.updateProjectionMatrix();
+    }
+  }
+
   // Função que lida com movimentação das rodas
   function moveWheel() {
     kart.frontAxle.rightWheel.rotation.set(
@@ -552,6 +521,9 @@ function main() {
     keyboard.update();
 
     kartRotationAngle = degreesToRadians(speed / 2);
+    if(cameraModeIndex === 0) {
+      window.addEventListener("wheel", onMouseWheel, true);
+    }
     if (cameraModeIndex == 0 || cameraModeIndex == 1) {
       // Mostrar velocímetro
       showElement(speedometer.box);
@@ -661,16 +633,11 @@ function main() {
     }
 
     if (cameraModeIndex == 0) {
+      window.addEventListener("wheel", onMouseWheel, true);
       trackballControls.enabled = true;
       trackballControls.update();
       moveGameCamera();
-    } else if (cameraModeIndex == 1) {
-      trackballControls.enabled = false;
-      moveCockpitCamera(kart);
-    } else {
-      trackballControls.enabled = true;
-      trackballControls.update();
-    }    
+    } 
 
     requestAnimationFrame(render);
     renderer.render(scene, camera); // Render scene
